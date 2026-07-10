@@ -219,6 +219,63 @@ class MilkTeaStore:
             ).fetchall()
         return self._order(order, items)
 
+    def save_product(self, payload, product_id=None):
+        name = (payload.get("name") or "").strip()
+        category = (payload.get("category") or "").strip()
+        description = (payload.get("description") or "").strip()
+        try:
+            price = int(payload.get("price") or 0)
+        except (TypeError, ValueError):
+            price = 0
+        if not name or not category or not description or price <= 0:
+            raise ValueError("Name, category, description, and positive price are required.")
+
+        with self.connect() as connection:
+            if product_id is not None:
+                cursor = connection.execute(
+                    """
+                    UPDATE products
+                    SET name = ?, category = ?, price = ?, description = ?
+                    WHERE id = ?
+                    """,
+                    (name, category, price, description, product_id),
+                )
+                if cursor.rowcount == 0:
+                    return None
+            else:
+                sort_order = connection.execute(
+                    "SELECT COUNT(*) AS count FROM products"
+                ).fetchone()["count"]
+                cursor = connection.execute(
+                    """
+                    INSERT INTO products (name, category, price, description, active, sort_order)
+                    VALUES (?, ?, ?, ?, 1, ?)
+                    """,
+                    (name, category, price, description, sort_order),
+                )
+                product_id = cursor.lastrowid
+        return self.get_product(product_id)
+
+    def update_product_status(self, product_id, active):
+        with self.connect() as connection:
+            cursor = connection.execute(
+                "UPDATE products SET active = ? WHERE id = ?",
+                (1 if active else 0, product_id),
+            )
+            if cursor.rowcount == 0:
+                return None
+        return self.get_product(product_id)
+
+    def sales_summary(self):
+        with self.connect() as connection:
+            row = connection.execute(
+                """
+                SELECT COUNT(*) AS order_count, COALESCE(SUM(total), 0) AS revenue
+                FROM orders
+                """
+            ).fetchone()
+        return {"order_count": row["order_count"], "revenue": row["revenue"]}
+
     @staticmethod
     def _product(row):
         return {

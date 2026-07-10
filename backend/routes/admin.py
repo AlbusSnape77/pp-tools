@@ -60,3 +60,52 @@ def update_order_status(order_id):
     if not order:
         return jsonify({"error": "Order not found."}), 404
     return jsonify({"order": order})
+
+
+@admin_bp.get("/milk-tea/products")
+@require_admin
+def admin_products():
+    return jsonify({"products": store().list_products(include_inactive=True)})
+
+
+@admin_bp.post("/milk-tea/products")
+@require_admin
+def admin_create_product():
+    try:
+        product = store().save_product(request_body())
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    return jsonify({"product": product}), 201
+
+
+@admin_bp.put("/milk-tea/products/<int:product_id>")
+@require_admin
+def admin_update_product(product_id):
+    try:
+        product = store().save_product(request_body(), product_id=product_id)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+    return jsonify({"product": product})
+
+
+@admin_bp.patch("/milk-tea/products/<int:product_id>/status")
+@require_admin
+def admin_update_product_status(product_id):
+    try:
+        body = request_body()
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+    if not isinstance(body.get("active"), bool):
+        return jsonify({"error": "Active must be true or false."}), 400
+    product = store().update_product_status(product_id, body["active"])
+    if not product:
+        return jsonify({"error": "Product not found."}), 404
+    return jsonify({"product": product})
+
+
+@admin_bp.get("/milk-tea/summary")
+@require_admin
+def admin_summary():
+    return jsonify({"summary": store().sales_summary()})
