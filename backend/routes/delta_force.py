@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from services.delta_ocr import DeltaRecognizer
 
@@ -18,5 +18,15 @@ def analyze():
         result = DeltaRecognizer().analyze(files)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
+    except Exception:
+        current_app.logger.exception("Delta Force screenshot analysis failed")
+        return jsonify({"error": "Screenshots could not be analyzed."}), 422
 
-    return jsonify({"result": result, "warnings": []})
+    has_result = bool(
+        result.get("nickname")
+        or result.get("overview")
+        or result.get("ranked")
+        or result.get("recent_matches")
+    )
+    warnings = [] if has_result else ["No supported result screens were recognized."]
+    return jsonify({"result": result, "warnings": warnings})

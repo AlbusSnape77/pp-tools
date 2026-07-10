@@ -17,14 +17,13 @@ describe("App", () => {
     expect(screen.getByText("Sanpingfang Milk Tea")).toBeInTheDocument();
   });
 
-  it("renders the Delta Force route", () => {
+  it("renders the immersive Delta route without the shared navigation", async () => {
     window.history.pushState({}, "", "/tools/delta-force");
 
     render(<App />);
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Delta Force Stats" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("返回工具中心")).toHaveTextContent("DELTASTATS");
+    expect(screen.queryByRole("navigation", { name: "Primary navigation" })).not.toBeInTheDocument();
   });
 
   it("renders the Beauty Cam route", () => {

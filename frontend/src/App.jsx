@@ -1,12 +1,13 @@
+import { lazy, Suspense } from "react";
 import AppLayout from "./components/AppLayout";
 import HomePage from "./pages/HomePage";
 import BeautyCamPage from "./tools/beauty-cam/BeautyCamPage";
-import DeltaForcePage from "./tools/delta-force/DeltaForcePage";
 import AdminMilkTeaPage from "./tools/milk-tea/AdminMilkTeaPage";
 import MilkTeaPage from "./tools/milk-tea/MilkTeaPage";
 
-function routeFor(pathname) {
-  if (pathname === "/tools/delta-force") return <DeltaForcePage />;
+const DeltaForcePage = lazy(() => import("./tools/delta-force/DeltaForcePage"));
+
+function regularRoute(pathname) {
   if (pathname === "/tools/beauty-cam") return <BeautyCamPage />;
   if (pathname === "/tools/milk-tea") return <MilkTeaPage />;
   if (pathname === "/admin/milk-tea") return <AdminMilkTeaPage />;
@@ -14,5 +15,13 @@ function routeFor(pathname) {
 }
 
 export default function App() {
-  return <AppLayout>{routeFor(window.location.pathname)}</AppLayout>;
+  const pathname = window.location.pathname;
+  if (pathname === "/tools/delta-force") {
+    return (
+      <Suspense fallback={<main aria-label="正在加载战绩工具" />}>
+        <DeltaForcePage />
+      </Suspense>
+    );
+  }
+  return <AppLayout>{regularRoute(pathname)}</AppLayout>;
 }

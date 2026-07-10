@@ -1,221 +1,221 @@
-# pp-tools Online Suite Design
+# pp-tools 在线工具套件设计
 
-Date: 2026-07-09
-Status: Draft for review
+日期：2026-07-09
+状态：已评审
 
-## Summary
+## 概要
 
-`pp-tools` is an independent online tool suite. It turns three existing local or platform-specific tools into browser-accessible web products:
+`pp-tools` 是一个独立的在线工具套件，将三个已有的本地或平台专用工具改造成可以直接在浏览器中使用的网页产品：
 
-1. Delta Force Stats: upload result screenshots, run server-side recognition, and view a structured match profile.
-2. Gesture Beauty Cam: run webcam effects directly in the browser with no server upload.
-3. Sanpingfang Milk Tea: browse products, customize drinks, place orders, and manage shop data through a web admin view.
+1. Delta Force Stats：上传战绩截图，在服务器运行识别并展示结构化玩家档案。
+2. Gesture Beauty Cam：在浏览器中运行摄像头美颜和手势特效，不上传摄像头画面。
+3. Sanpingfang Milk Tea：浏览商品、定制饮品、提交订单，并通过网页后台管理商品和订单。
 
-The personal homepage stays separate. It will link to the new online tools, while this project owns the actual product experience, backend APIs, data, and deployment.
+个人主页继续保持为独立项目，只负责链接这些在线工具。`pp-tools` 负责实际产品体验、后端接口、数据和部署。
 
-## Goals
+## 目标
 
-- Provide a real online product that users can open in a browser and use without downloading desktop packages.
-- Preserve the core value of the existing three tools while adapting them to web constraints.
-- Use a clean front-end and back-end split so recognition, ordering, and admin features are maintainable.
-- Keep the first release focused on a complete web equivalent of the core workflows.
-- Leave a clear path for future LLM-powered workflow features after the online tools are stable.
+- 提供可以直接在浏览器打开使用、无需下载桌面程序的在线产品。
+- 在适配网页限制的同时，保留三个原工具的核心价值。
+- 使用清晰的前后端边界，保证识别、订单和后台功能可维护。
+- 第一版优先完成核心流程的网页等价体验。
+- 在线工具稳定后，为后续大模型工作流功能保留清晰扩展路径。
 
-## Non-Goals
+## 不在本次范围内
 
-- Do not control the user's local game client, desktop windows, or local file system from the browser.
-- Do not require users to install a local helper app.
-- Do not recreate the WeChat Mini Program runtime exactly.
-- Do not add real payment, shipping, SMS login, or production identity verification in the first release.
-- Do not store real model keys, admin passwords, or other secrets in the repository.
+- 不从浏览器控制用户的本地游戏客户端、桌面窗口或本地文件系统。
+- 不要求用户安装本地辅助程序。
+- 不完全复刻微信小程序运行环境。
+- 第一版不加入真实支付、配送、短信登录或生产级身份认证。
+- 仓库中不保存真实模型密钥、管理员密码或其他秘密信息。
 
-## Product Shape
+## 产品形态
 
-The root page is a product-style tool center with three primary cards:
+根页面是产品式工具中心，包含三个主要入口：
 
 - Delta Force Stats
 - Gesture Beauty Cam
 - Sanpingfang Milk Tea
 
-Each card opens a dedicated tool page. The pages share a common shell with navigation, status messages, loading states, error states, and responsive layout.
+每个入口打开独立工具页面。页面共用基础导航、状态消息、加载状态、错误状态和响应式布局；需要保留原版沉浸式界面的工具可以使用独立页面外壳。
 
-The homepage project can later update its software links to point to these tool pages:
+个人主页后续可以将软件链接更新为：
 
 - `/tools/delta-force`
 - `/tools/beauty-cam`
 - `/tools/milk-tea`
 
-## Architecture
+## 系统架构
 
-### Frontend
+### 前端
 
-Use `Vite + React` for the web application.
+网页应用使用 `Vite + React`。
 
-Responsibilities:
+主要职责：
 
-- Tool center landing page.
-- Three tool pages.
-- Shared layout, buttons, forms, cards, charts, modals, and empty states.
-- API client wrappers.
-- Responsive desktop and mobile views.
-- Browser-only webcam experience for Beauty Cam.
+- 工具中心首页。
+- 三个工具页面。
+- 共用布局、按钮、表单、卡片、图表、弹窗和空状态。
+- 接口请求封装。
+- 桌面端和移动端响应式布局。
+- Beauty Cam 的纯浏览器摄像头体验。
 
-### Backend
+### 后端
 
-Use `Python + Flask` for the API server.
+接口服务使用 `Python + Flask`。
 
-Responsibilities:
+主要职责：
 
-- Serve the production frontend build.
-- Accept Delta Force screenshot uploads.
-- Run screenshot recognition and return structured data.
-- Manage milk tea shop products, orders, status changes, and admin access.
-- Store lightweight data in SQLite.
-- Enforce file size limits and reject unsupported uploads.
+- 提供生产环境前端静态文件。
+- 接收 Delta Force 截图上传。
+- 运行截图识别并返回结构化数据。
+- 管理奶茶店商品、订单、状态修改和后台访问。
+- 使用 SQLite 保存轻量业务数据。
+- 限制上传文件大小并拒绝不支持的文件。
 
-### Data
+### 数据
 
-Use SQLite for the first release.
+第一版使用 SQLite。
 
-Primary tables:
+主要数据表：
 
 - `milk_products`
 - `milk_orders`
 - `milk_order_items`
 - `milk_shop_settings`
-- `admin_sessions` or signed admin tokens
+- `admin_sessions` 或签名管理员令牌
 
-Delta Force uploads are temporary. Uploaded images should be deleted after recognition finishes or fails.
+Delta Force 上传图片只做临时处理，无论识别成功或失败都必须删除。
 
-## Tool 1: Delta Force Stats
+## 工具一：Delta Force Stats
 
-### User Flow
+### 用户流程
 
-1. User opens `/tools/delta-force`.
-2. User drags, pastes, or selects result screenshots.
-3. Frontend previews selected images and validates file count/type/size.
-4. User clicks analyze.
-5. Backend runs recognition and parsing.
-6. Frontend shows a structured profile.
-7. User can copy a summary or export JSON.
+1. 用户打开 `/tools/delta-force`。
+2. 用户拖入、粘贴或选择战绩截图。
+3. 前端预览图片，并校验数量、类型和大小。
+4. 用户点击识别。
+5. 后端运行识别和解析。
+6. 前端显示结构化玩家档案。
+7. 用户可以保存浏览器本地档案、复制摘要或导出数据。
 
-### Core Output
+### 核心输出
 
-The returned result should support:
+返回结果应支持：
 
-- Nickname when recognized.
-- Rank and rank stars when recognized.
-- Overview and ranked KD values.
-- Escape rate.
-- Match count and play time.
-- Carry value and related numeric fields when available.
-- Radar values.
-- Recent match list when available.
-- Warnings for missing or low-confidence fields.
+- 识别到的昵称。
+- 识别到的段位和星数。
+- 数据总览和排位赛 KD。
+- 撤离率。
+- 对局数量和游戏时长。
+- 带出价值及其他可用数值字段。
+- 五维雷达数据。
+- 可用的近期战绩列表。
+- 缺失字段或低置信度字段警告。
 
-### Privacy Rules
+### 隐私规则
 
-- Do not keep uploaded screenshots after processing.
-- Do not expose server file paths in API responses.
-- Return understandable failure messages when recognition cannot parse the images.
+- 处理完成后不得保留上传截图。
+- 接口响应不得暴露服务器文件路径。
+- 无法解析截图时返回用户能够理解的错误。
 
-### First Release Exclusions
+### 第一版排除项
 
-- No local game automation.
-- No automatic desktop screenshot capture.
-- No player search automation.
-- No permanent storage of uploaded screenshots.
+- 不运行本地游戏自动控制。
+- 不自动截取桌面画面。
+- 不通过网页控制游戏进行玩家搜索。
+- 不永久保存上传截图。
 
-## Tool 2: Gesture Beauty Cam
+## 工具二：Gesture Beauty Cam
 
-### User Flow
+### 用户流程
 
-1. User opens `/tools/beauty-cam`.
-2. Browser requests camera permission.
-3. User sees live camera output on canvas.
-4. User adjusts beauty sliders and filters.
-5. Hand gestures trigger visual effects.
-6. User can compare against the original view and toggle camera output.
+1. 用户打开 `/tools/beauty-cam`。
+2. 浏览器请求摄像头权限。
+3. 用户在画布中看到实时摄像头画面。
+4. 用户调节美颜滑块和滤镜。
+5. 手势触发视觉特效。
+6. 用户可以对比原始画面并控制摄像头开关。
 
-### Core Features
+### 核心功能
 
-- Skin smoothing.
-- Brightening.
-- Face slimming.
-- Eye enlargement.
-- Blush.
-- Filter presets.
-- Gesture-triggered particles or effects.
-- Compare mode.
-- Camera on/off control.
+- 磨皮。
+- 提亮。
+- 瘦脸。
+- 大眼。
+- 腮红。
+- 预设滤镜。
+- 手势触发粒子或视觉效果。
+- 原图对比模式。
+- 摄像头开关。
 
-### Privacy Rules
+### 隐私规则
 
-- Camera frames stay in the browser.
-- Do not upload video or images to the backend.
-- Show a clear error if the browser blocks camera access.
+- 摄像头画面只在浏览器中处理。
+- 不向后端上传视频或图片。
+- 浏览器阻止摄像头访问时显示明确错误。
 
-### First Release Exclusions
+### 第一版排除项
 
-- No server-side video processing.
-- No account-based photo gallery.
-- No automatic cloud save.
+- 不在服务器处理视频。
+- 不提供基于账号的照片库。
+- 不自动保存到云端。
 
-## Tool 3: Sanpingfang Milk Tea
+## 工具三：Sanpingfang Milk Tea
 
-### User Flow
+### 用户流程
 
-1. User opens `/tools/milk-tea`.
-2. User browses products by category.
-3. User opens product details.
-4. User customizes cup size, sweetness, ice level, toppings, and quantity.
-5. User adds items to cart.
-6. User submits an order.
-7. User can view order status.
+1. 用户打开 `/tools/milk-tea`。
+2. 用户按照分类浏览商品。
+3. 用户打开商品详情。
+4. 用户选择杯型、甜度、冰量、小料和数量。
+5. 用户将商品加入购物车。
+6. 用户提交订单。
+7. 用户查询订单状态。
 
-### Admin Flow
+### 后台流程
 
-1. Maintainer opens `/admin/milk-tea`.
-2. Maintainer enters the configured admin password.
-3. Admin can create, edit, disable, and reorder products.
-4. Admin can view orders and update order status.
-5. Admin can view basic sales totals.
+1. 管理员打开 `/admin/milk-tea`。
+2. 管理员输入环境中配置的后台密码。
+3. 管理员创建、编辑、停用和排序商品。
+4. 管理员查看订单并更新订单状态。
+5. 管理员查看基础销售统计。
 
-### Core Features
+### 核心功能
 
-- Product category list.
-- Product cards.
-- Product detail view.
-- Drink customization.
-- Cart.
-- Order creation.
-- Order status list.
-- Admin product management.
-- Admin order management.
-- Basic sales summary.
+- 商品分类列表。
+- 商品卡片。
+- 商品详情。
+- 饮品定制。
+- 购物车。
+- 创建订单。
+- 查询订单状态。
+- 后台商品管理。
+- 后台订单管理。
+- 基础销售统计。
 
-### First Release Exclusions
+### 第一版排除项
 
-- No real payment.
-- No delivery integration.
-- No SMS, WeChat, or email login.
-- No multi-store support.
-- No customer identity verification beyond local order lookup.
+- 不接入真实支付。
+- 不接入配送服务。
+- 不提供短信、微信或邮件登录。
+- 不支持多门店。
+- 除本地订单查询码外，不进行顾客身份认证。
 
-## API Draft
+## 接口草案
 
-Delta Force:
+Delta Force：
 
 - `POST /api/delta-force/analyze`
 
-Milk Tea public:
+奶茶店公开接口：
 
 - `GET /api/milk-tea/products`
 - `GET /api/milk-tea/products/:id`
 - `POST /api/milk-tea/orders`
 - `GET /api/milk-tea/orders/:lookupCode`
 
-Milk Tea admin:
+奶茶店后台接口：
 
 - `POST /api/admin/login`
 - `GET /api/admin/milk-tea/products`
@@ -226,7 +226,7 @@ Milk Tea admin:
 - `PATCH /api/admin/milk-tea/orders/:id/status`
 - `GET /api/admin/milk-tea/summary`
 
-## Project Structure
+## 项目结构
 
 ```text
 pp-tools
@@ -254,86 +254,86 @@ pp-tools
 `-- README.md
 ```
 
-## Error Handling
+## 错误处理
 
-- Frontend shows inline errors for failed requests, blocked camera permission, empty uploads, invalid files, and unavailable server responses.
-- Backend returns JSON errors with stable `error` messages.
-- Delta Force analysis returns partial results with warnings when possible instead of failing the entire request.
-- Milk Tea order creation validates required customization and quantity fields.
-- Admin endpoints return authorization errors without leaking internal details.
+- 前端为请求失败、摄像头权限被拒、空上传、无效文件和服务器不可用显示行内错误。
+- 后端返回带稳定 `error` 字段的 JSON 错误。
+- Delta Force 尽可能返回部分结果和警告，而不是让整个请求失败。
+- 创建奶茶订单时校验必填定制项和数量。
+- 后台接口返回授权错误时不得泄露内部细节。
 
-## Security And Operations
+## 安全与运维
 
-- Secrets must come from environment variables.
-- Repository files must not contain real keys, tokens, or passwords.
-- Admin password is configured outside source control.
-- Uploaded files are limited by type, size, and count.
-- Temporary uploads are deleted after processing.
-- SQLite data should be easy to back up before deployment changes.
+- 秘密信息必须来自环境变量。
+- 仓库文件不得保存真实密钥、令牌或密码。
+- 管理员密码在源代码之外配置。
+- 限制上传文件类型、大小和数量。
+- 临时上传文件在处理后删除。
+- 部署变更前应能够方便备份 SQLite 数据。
 
-## Testing
+## 测试
 
-Frontend tests:
+前端测试：
 
-- Tool center renders all three tools.
-- Delta Force upload page handles empty, invalid, and valid selections.
-- Beauty Cam page renders controls and handles permission error state.
-- Milk Tea page supports product list, customization, cart, and order submit states.
+- 工具中心可以显示三个工具。
+- Delta Force 上传页面可以处理空选择、无效选择和有效选择。
+- Beauty Cam 可以显示控制项并处理权限错误。
+- 奶茶店页面支持商品列表、定制、购物车和提交订单状态。
 
-Backend tests:
+后端测试：
 
-- Delta Force analyze endpoint rejects missing files and invalid file types.
-- Delta Force analyze endpoint returns structured JSON for a known sample or mocked recognizer.
-- Milk Tea product APIs return active products.
-- Milk Tea order API creates an order and returns a lookup code.
-- Admin endpoints reject unauthenticated requests.
-- Admin endpoints update product and order status after login.
+- Delta Force 分析接口拒绝缺失文件和无效文件类型。
+- Delta Force 分析接口可以针对已知样例或模拟识别器返回结构化 JSON。
+- 奶茶店商品接口返回启用商品。
+- 奶茶店订单接口可以创建订单并返回查询码。
+- 未认证请求无法访问后台接口。
+- 管理员登录后可以修改商品和订单状态。
 
-Browser verification:
+真实浏览器验收：
 
-- Open the product center.
-- Open each tool page.
-- Complete a milk tea order flow.
-- Update the order status in admin.
-- Load Beauty Cam and verify camera permission handling.
-- Upload a Delta Force sample image and verify result or failure state.
+- 打开工具中心。
+- 打开三个工具页面。
+- 完成一次奶茶下单流程。
+- 在后台更新订单状态。
+- 打开 Beauty Cam 并检查摄像头权限处理。
+- 上传 Delta Force 样例图片并检查识别结果或明确的失败状态。
 
-## Deployment Plan
+## 部署方案
 
-First run everything locally:
+第一阶段先在本机运行：
 
-- Frontend development server.
-- Flask API server.
-- SQLite database file.
+- 前端开发服务器。
+- Flask 接口服务。
+- SQLite 数据库文件。
 
-For production, use a platform that can run a Python web service with the required recognition dependencies. The frontend build can be served by the Flask server or by a static host that calls the API server.
+生产环境使用能够运行 Python 服务及识别依赖的平台。前端构建产物可以由 Flask 提供，也可以部署到静态托管服务并调用独立接口服务。
 
-Before production launch:
+正式发布前必须：
 
-- Configure environment variables.
-- Set upload limits.
-- Add a privacy notice for uploaded screenshots and webcam behavior.
-- Back up SQLite data.
-- Verify admin access cannot be reached without authorization.
+- 配置环境变量。
+- 设置上传限制。
+- 为截图上传和摄像头行为添加隐私说明。
+- 备份 SQLite 数据。
+- 验证未授权用户无法访问后台功能。
 
-## Future Upgrade Path
+## 后续升级路径
 
-After the online tool suite is stable, add a second product layer:
+在线工具套件稳定后，再增加第二层产品能力：
 
-- LLM-powered website and content optimization assistant.
-- Task based workflow files for repeatable improvement runs.
-- Structured run reports that record inputs, tool calls, outputs, checks, and review status.
-- Human-approved change application instead of automatic source edits.
+- 大模型驱动的网站和内容优化助手。
+- 可重复执行的任务工作流文件。
+- 记录输入、工具调用、输出、检查和审核状态的结构化运行报告。
+- 由人工确认后再应用代码修改。
 
-This keeps the first release focused on usable online tools while leaving a clear path toward a mature LLM + intelligent workflow product.
+第一版先保证在线工具可用，同时为后续成熟的智能工作流产品保留扩展空间。
 
-## Acceptance Criteria
+## 验收标准
 
-- A new `pp-tools` project has a reviewed design and implementation plan.
-- The first implementation can run locally with frontend and backend.
-- All three tool pages are reachable from the product center.
-- Delta Force accepts screenshots and returns either structured results or a clear failure state.
-- Beauty Cam runs without uploading camera frames.
-- Milk Tea supports product browsing, cart, order creation, and admin order status updates.
-- The personal homepage can link to the tool pages without merging the two projects.
-- No repository file contains real secrets or provider/tooling signatures.
+- `pp-tools` 项目具有已评审的设计和实施计划。
+- 第一版能够在本地同时运行前端和后端。
+- 工具中心可以进入三个工具页面。
+- Delta Force 可以接收截图，并返回结构化结果或明确错误。
+- Beauty Cam 不上传摄像头画面即可运行。
+- 奶茶店支持商品浏览、购物车、创建订单和后台更新订单状态。
+- 个人主页可以链接这些工具页面，不需要与本项目合并。
+- 仓库中不包含真实秘密信息或工具生成署名。
