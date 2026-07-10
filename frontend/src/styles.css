@@ -742,3 +742,213 @@ h1 {
     flex-direction: column;
   }
 }
+
+.delta-page {
+  padding-top: 40px;
+}
+
+.delta-heading {
+  max-width: 760px;
+}
+
+.delta-page h1 {
+  font-size: 4rem;
+}
+
+.delta-page h2,
+.delta-page h3,
+.delta-page p {
+  margin-top: 0;
+}
+
+.delta-upload,
+.delta-result {
+  border: 1px solid #dfe4ee;
+  border-radius: 8px;
+  background: #ffffff;
+  margin-top: 24px;
+  padding: 24px;
+}
+
+.delta-upload {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.7fr);
+  gap: 18px 28px;
+  align-items: end;
+}
+
+.delta-upload > div:first-child p:last-child {
+  color: #66738a;
+  line-height: 1.6;
+}
+
+.file-picker {
+  min-height: 112px;
+  border: 1px dashed #9ba8bc;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #f8fafc;
+  color: #3157c8;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.file-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.file-selection {
+  min-width: 0;
+  color: #526077;
+}
+
+.file-selection ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.file-selection li {
+  overflow-wrap: anywhere;
+}
+
+.delta-action {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #3157c8;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 11px 18px;
+}
+
+.delta-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.result-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.result-heading h2 {
+  font-size: 2rem;
+}
+
+.rank-badge {
+  min-width: 150px;
+  border-left: 3px solid #3157c8;
+  padding-left: 14px;
+  display: grid;
+  gap: 3px;
+}
+
+.rank-badge span,
+.rank-badge small,
+.delta-metrics span {
+  color: #66738a;
+}
+
+.rank-badge strong {
+  font-size: 1.3rem;
+}
+
+.delta-metrics {
+  margin: 24px 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid #e4e8f0;
+}
+
+.delta-metrics article {
+  min-width: 0;
+  padding: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.delta-metrics article + article {
+  border-left: 1px solid #e4e8f0;
+}
+
+.delta-metrics strong {
+  font-size: 1.55rem;
+}
+
+.radar-breakdown {
+  max-width: 720px;
+}
+
+.radar-row {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr) 36px;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  text-transform: capitalize;
+}
+
+.radar-row > div {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e8ecf3;
+}
+
+.radar-row i {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: #3157c8;
+}
+
+@media (max-width: 760px) {
+  .delta-page h1 {
+    font-size: 2.75rem;
+  }
+
+  .delta-upload {
+    grid-template-columns: 1fr;
+  }
+
+  .delta-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .delta-metrics article:nth-child(3) {
+    border-left: 0;
+  }
+
+  .delta-metrics article:nth-child(n + 3) {
+    border-top: 1px solid #e4e8f0;
+  }
+}
+
+@media (max-width: 460px) {
+  .result-heading {
+    flex-direction: column;
+  }
+
+  .delta-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .delta-metrics article + article {
+    border-top: 1px solid #e4e8f0;
+    border-left: 0;
+  }
+
+  .radar-row {
+    grid-template-columns: 72px minmax(0, 1fr) 28px;
+    gap: 8px;
+  }
+}
