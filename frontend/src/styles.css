@@ -91,3 +91,25 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.topbar {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  font-weight: 800;
+}
+
+.topbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #5d6a82;
+  font-weight: 700;
+}
