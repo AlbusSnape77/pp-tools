@@ -22,7 +22,7 @@ function stateForError(error) {
   return "error";
 }
 
-function defaultLaunchProtocol(protocolUrl) {
+function openProtocol(protocolUrl) {
   const anchor = document.createElement("a");
   anchor.href = protocolUrl;
   anchor.style.display = "none";
@@ -31,10 +31,29 @@ function defaultLaunchProtocol(protocolUrl) {
   anchor.remove();
 }
 
+export async function launchCompanion(protocolUrl, options = {}) {
+  const hostname = options.hostname ?? window.location.hostname;
+  const fetchImpl = options.fetchImpl ?? ((...args) => window.fetch(...args));
+  const openProtocolFallback = options.openProtocol ?? openProtocol;
+  const localHost = ["127.0.0.1", "localhost", "[::1]"].includes(hostname);
+
+  if (localHost) {
+    try {
+      const response = await fetchImpl("/api/delta-runtime/start", { method: "POST" });
+      if (response.ok) return "runtime";
+    } catch {
+      // The custom protocol remains available when the local site server is absent.
+    }
+  }
+
+  openProtocolFallback(protocolUrl);
+  return "protocol";
+}
+
 export function useDeltaCompanion({
   client,
   protocolUrl = "delta-stats://start",
-  launchProtocol = defaultLaunchProtocol,
+  launchProtocol = launchCompanion,
   requirements = DEFAULT_REQUIREMENTS,
 } = {}) {
   const [state, setStateValue] = useState("checking");
@@ -85,7 +104,6 @@ export function useDeltaCompanion({
 
   const launch = useCallback(() => {
     setState("launching");
-    launchProtocol(protocolUrl);
     let attempts = 0;
     const poll = async () => {
       attempts += 1;
@@ -94,7 +112,11 @@ export function useDeltaCompanion({
         launchPollTimer.current = window.setTimeout(poll, 500);
       }
     };
-    launchPollTimer.current = window.setTimeout(poll, 500);
+    Promise.resolve(launchProtocol(protocolUrl))
+      .catch(() => {})
+      .finally(() => {
+        launchPollTimer.current = window.setTimeout(poll, 500);
+      });
   }, [detect, launchProtocol, protocolUrl, setState]);
 
   const pair = useCallback(async (code) => {

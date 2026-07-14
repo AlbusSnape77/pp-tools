@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useDeltaCompanion } from "./useDeltaCompanion";
+import { launchCompanion, useDeltaCompanion } from "./useDeltaCompanion";
 
 
 it("moves from unavailable through launch and pairing to ready", async () => {
@@ -42,4 +42,20 @@ it("requires pairing when the companion is online without a token", async () => 
   const { result } = renderHook(() => useDeltaCompanion({ client }));
 
   await waitFor(() => expect(result.current.state).toBe("pairing_required"));
+});
+
+
+it("uses the local runtime endpoint before the custom protocol", async () => {
+  const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+  const openProtocol = vi.fn();
+
+  const result = await launchCompanion("delta-stats://start", {
+    fetchImpl,
+    hostname: "127.0.0.1",
+    openProtocol,
+  });
+
+  expect(result).toBe("runtime");
+  expect(fetchImpl).toHaveBeenCalledWith("/api/delta-runtime/start", { method: "POST" });
+  expect(openProtocol).not.toHaveBeenCalled();
 });
