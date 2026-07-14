@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DeltaForcePage from "./DeltaForcePage";
@@ -62,6 +62,26 @@ afterEach(() => {
 
 
 describe("DeltaForcePage Companion workflow", () => {
+  it("highlights Companion startup while the local service is unavailable", async () => {
+    const client = fakeCompanionClient();
+    client.health.mockRejectedValue({ code: "companion_unavailable" });
+    client.hasToken.mockReturnValue(false);
+
+    render(<DeltaForcePage companionClient={client} />);
+
+    const guide = await screen.findByRole("region", { name: "Delta 使用指南" });
+    expect(within(guide).getByText("启动 Companion").closest("li")).toHaveClass("is-active");
+  });
+
+  it("moves the guide to game preparation after Companion is ready", async () => {
+    const client = fakeCompanionClient();
+
+    render(<DeltaForcePage companionClient={client} />);
+
+    const guide = await screen.findByRole("region", { name: "Delta 使用指南" });
+    expect(within(guide).getByText("打开游戏并停留在可操作的大厅界面").closest("li")).toHaveClass("is-active");
+  });
+
   it("keeps rendering when a migrated match has no map time", async () => {
     const playerWithIncompleteMatch = {
       ...recognizedPlayer,

@@ -2,10 +2,18 @@ import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getCameraErrorMessage, useCameraStream } from "./useCameraStream";
 
-function makeStream() {
-  const tracks = [{ stop: vi.fn() }, { stop: vi.fn() }];
+function makeStream({ maxFrameRate, applyError } = {}) {
+  const videoTrack = {
+    stop: vi.fn(),
+    getCapabilities: vi.fn(() => maxFrameRate ? { frameRate: { max: maxFrameRate } } : {}),
+    applyConstraints: applyError
+      ? vi.fn().mockRejectedValue(applyError)
+      : vi.fn().mockResolvedValue(undefined),
+  };
+  const tracks = [videoTrack, { stop: vi.fn() }];
   return {
     getTracks: () => tracks,
+    getVideoTracks: () => [videoTrack],
   };
 }
 
@@ -28,10 +36,30 @@ describe("useCameraStream", () => {
 
     await result.current.startCamera();
     await waitFor(() => expect(result.current.status).toBe("running"));
-    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith(expect.objectContaining({ audio: false }));
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      audio: false,
+      video: expect.objectContaining({ frameRate: { ideal: 60 } }),
+    });
 
     unmount();
     for (const track of stream.getTracks()) expect(track.stop).toHaveBeenCalled();
+  });
+
+  it("请求摄像头最高可用帧率，失败时仍保持视频流", async () => {
+    const stream = makeStream({ maxFrameRate: 120 });
+    navigator.mediaDevices.getUserMedia.mockResolvedValue(stream);
+    const { result } = renderHook(() => useCameraStream());
+
+    await result.current.startCamera();
+    await waitFor(() => expect(result.current.status).toBe("running"));
+    expect(stream.getVideoTracks()[0].applyConstraints).toHaveBeenCalledWith({
+      frameRate: { ideal: 120 },
+    });
+
+    const fallbackStream = makeStream({ maxFrameRate: 120, applyError: new Error("unsupported") });
+    navigator.mediaDevices.getUserMedia.mockResolvedValue(fallbackStream);
+    await result.current.startCamera();
+    await waitFor(() => expect(result.current.status).toBe("running"));
   });
 
   it("把常见媒体错误转换为中文恢复说明", () => {

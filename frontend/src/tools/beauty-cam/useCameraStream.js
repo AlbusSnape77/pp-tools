@@ -22,6 +22,19 @@ function stopTracks(stream) {
   stream?.getTracks?.().forEach((track) => track.stop());
 }
 
+export async function applyHighestFrameRate(stream) {
+  const track = stream?.getVideoTracks?.()[0];
+  if (!track?.getCapabilities || !track?.applyConstraints) return null;
+  try {
+    const max = Number(track.getCapabilities()?.frameRate?.max);
+    if (!Number.isFinite(max) || max <= 0) return null;
+    await track.applyConstraints({ frameRate: { ideal: max } });
+    return max;
+  } catch {
+    return null;
+  }
+}
+
 export function useCameraStream() {
   const { t } = useI18n();
   const streamRef = useRef(null);
@@ -51,8 +64,10 @@ export function useCameraStream() {
           facingMode: { ideal: nextFacingMode },
           width: { ideal: 1280 },
           height: { ideal: 720 },
+          frameRate: { ideal: 60 },
         },
       });
+      await applyHighestFrameRate(nextStream);
       streamRef.current = nextStream;
       setStream(nextStream);
       setFacingMode(nextFacingMode);

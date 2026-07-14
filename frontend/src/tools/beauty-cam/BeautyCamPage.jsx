@@ -4,6 +4,7 @@ import BeautyControls from "./BeautyControls";
 import CameraStage from "./CameraStage";
 import CapturePreview from "./CapturePreview";
 import { BEAUTY_DEFAULTS, createBeautyRenderer } from "./beautyRenderer";
+import { createVideoFrameLoop } from "./frameScheduler";
 import { useCameraStream } from "./useCameraStream";
 import { createVisionRuntime } from "./visionRuntime";
 import "./beauty-cam.css";
@@ -54,11 +55,12 @@ export default function BeautyCamPage() {
     rendererRef.current = renderer;
     if (!renderer) return undefined;
     let active = true;
-    let frameId = 0;
+    let stopFrameLoop = () => {};
     let runtime = null;
     let latest = { faceLandmarks: null, hands: [] };
     let frames = 0;
     let lastFpsAt = performance.now();
+    let lastGestureLabel = "gestureIdle";
     const supportsRuntime = typeof window.MediaStream === "function";
 
     if (supportsRuntime) {
@@ -77,7 +79,7 @@ export default function BeautyCamPage() {
     function draw(now) {
       if (!active) return;
       const video = videoRef.current;
-      if (!captureRef.current && video?.readyState >= 2) {
+      if (!document.hidden && !captureRef.current && video?.readyState >= 2) {
         try {
           if (runtime) latest = runtime.detect(video, now);
           const gesture = renderer.render({
@@ -87,10 +89,14 @@ export default function BeautyCamPage() {
             faceLandmarks: latest.faceLandmarks,
             hands: latest.hands,
           });
-          if (gesture?.bothOpen) setGestureLabel("gestureHeart");
-          else if (gesture?.entries.some((entry) => entry.pinch)) setGestureLabel("gesturePinch");
-          else if (gesture?.openCount) setGestureLabel("gesturePalm");
-          else setGestureLabel("gestureIdle");
+          let nextGestureLabel = "gestureIdle";
+          if (gesture?.bothOpen) nextGestureLabel = "gestureHeart";
+          else if (gesture?.entries.some((entry) => entry.pinch)) nextGestureLabel = "gesturePinch";
+          else if (gesture?.openCount) nextGestureLabel = "gesturePalm";
+          if (nextGestureLabel !== lastGestureLabel) {
+            lastGestureLabel = nextGestureLabel;
+            setGestureLabel(nextGestureLabel);
+          }
           frames += 1;
           if (now - lastFpsAt >= 1000) {
             setFps(Math.round(frames * 1000 / (now - lastFpsAt)));
@@ -103,13 +109,12 @@ export default function BeautyCamPage() {
           runtime = null;
         }
       }
-      frameId = requestAnimationFrame(draw);
     }
-    frameId = requestAnimationFrame(draw);
+    stopFrameLoop = createVideoFrameLoop(videoRef.current, draw);
 
     return () => {
       active = false;
-      cancelAnimationFrame(frameId);
+      stopFrameLoop();
       runtime?.close();
       renderer.reset();
       rendererRef.current = null;

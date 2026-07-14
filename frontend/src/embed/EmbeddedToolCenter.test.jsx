@@ -30,7 +30,8 @@ it("falls back to the tool gallery for unknown routes", () => {
   expect(screen.getByRole("heading", { name: "我的在线工具箱" })).toBeInTheDocument();
 });
 
-it("renders the Delta detail flush without a duplicate back band", () => {
+it("renders the Delta detail flush with an in-toolbar back action", async () => {
+  const onNavigate = vi.fn();
   const companionClient = {
     health: vi.fn().mockResolvedValue({ version: "1.0.0", api_version: 1 }),
     hasToken: () => false,
@@ -39,12 +40,14 @@ it("renders the Delta detail flush without a duplicate back band", () => {
     <EmbeddedToolCenter
       language="zh"
       route="delta-force"
-      onNavigate={() => {}}
+      onNavigate={onNavigate}
       companionClient={companionClient}
     />,
   );
 
   expect(container.querySelector(".embedded-detail")).toHaveClass("embedded-detail--flush");
   expect(container.querySelector(".embed-back")).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "返回工具中心" }));
+  expect(onNavigate).toHaveBeenCalledWith("home");
   expect(embedCss).toMatch(/\.pp-tools-embed #topbar\s*{[^}]*top:\s*0/);
 });

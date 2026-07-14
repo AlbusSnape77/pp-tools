@@ -11,8 +11,9 @@ export default function DeltaCommandBar({
   onSearch,
   onStop,
   onCalibration,
+  onBack,
 }) {
-  const { config, t } = useI18n();
+  const { t } = useI18n();
   const submit = (event) => {
     event.preventDefault();
     onSearch();
@@ -21,11 +22,15 @@ export default function DeltaCommandBar({
   return (
     <>
       <header id="topbar">
-        <a className="brand" href={config.homeHref || "/"} aria-label={t("common.back")}>
+        <button className="delta-back" type="button" onClick={onBack} aria-label={t("common.back")}>
+          <span aria-hidden="true">←</span>
+          <span>{t("common.back")}</span>
+        </button>
+        <div className="brand">
           <span className="mark">◢◤</span>
           <span className="bn">DELTA<b>STATS</b></span>
           <span className="bsub">{t("delta.brandSub")}</span>
-        </a>
+        </div>
         <form className="cmd" onSubmit={submit}>
           <input
             id="al-input"

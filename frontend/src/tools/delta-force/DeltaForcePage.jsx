@@ -8,6 +8,7 @@ import DeltaDossier from "./DeltaDossier";
 import DeltaRoster from "./DeltaRoster";
 import DeltaTaskProgress from "./DeltaTaskProgress";
 import DeltaUploadPanel from "./DeltaUploadPanel";
+import DeltaUsageGuide from "./DeltaUsageGuide";
 import { useDeltaCompanion } from "./useDeltaCompanion";
 import "./delta-force.css";
 
@@ -21,6 +22,7 @@ export default function DeltaForcePage({
   countdownSeconds = 5,
   pollInterval = 500,
   onNavigate = () => {},
+  embedded = false,
 }) {
   const { config, t } = useI18n();
   const client = useMemo(() => companionClient || createDeltaCompanionClient({
@@ -48,6 +50,10 @@ export default function DeltaForcePage({
 
   const selectedRecord = players.find((player) => player.id === selectedId) || null;
   const jobBusy = Boolean(job && ["pending", "running"].includes(job.state));
+  const returnToTools = () => {
+    if (embedded) onNavigate("home");
+    else window.location.assign(config.homeHref || "/");
+  };
 
   const loadPlayers = useCallback(async (value = "") => {
     const next = await client.listPlayers(value);
@@ -192,8 +198,10 @@ export default function DeltaForcePage({
         onSearch={beginCountdown}
         onStop={cancelCurrentJob}
         onCalibration={() => onNavigate("delta-force/calibration")}
+        onBack={returnToTools}
       />
       <DeltaConnectionPanel connection={connection} downloadUrl={config.companionDownloadUrl} />
+      <DeltaUsageGuide connectionState={connection.state} busy={jobBusy} />
       {countdownQuery ? (
         <DeltaCountdown
           seconds={countdownSeconds}

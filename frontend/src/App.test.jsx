@@ -22,9 +22,10 @@ describe("App", () => {
   it("renders the immersive Delta route without the shared navigation", async () => {
     window.history.pushState({}, "", "/tools/delta-force");
 
-    render(<App />);
+    const { container } = render(<App />);
 
-    expect(await screen.findByLabelText("返回工具中心")).toHaveTextContent("DELTASTATS");
+    expect(await screen.findByRole("button", { name: "返回工具中心" })).toBeInTheDocument();
+    expect(container.querySelector(".brand")).toHaveTextContent("DELTASTATS");
     expect(screen.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
   });
 
