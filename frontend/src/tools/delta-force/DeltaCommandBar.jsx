@@ -1,4 +1,18 @@
-export default function DeltaCommandBar({ query, recordCount, status, onQueryChange, onSearch }) {
+import { useI18n } from "../../i18n/I18nContext";
+
+export default function DeltaCommandBar({
+  query,
+  recordCount,
+  status,
+  busy,
+  usage,
+  ready,
+  onQueryChange,
+  onSearch,
+  onStop,
+  onCalibration,
+}) {
+  const { config, t } = useI18n();
   const submit = (event) => {
     event.preventDefault();
     onSearch();
@@ -7,27 +21,32 @@ export default function DeltaCommandBar({ query, recordCount, status, onQueryCha
   return (
     <>
       <header id="topbar">
-        <a className="brand" href="/" aria-label="返回工具中心">
+        <a className="brand" href={config.homeHref || "/"} aria-label={t("common.back")}>
           <span className="mark">◢◤</span>
           <span className="bn">DELTA<b>STATS</b></span>
-          <span className="bsub">烽火地带 · 战绩分析</span>
+          <span className="bsub">{t("delta.brandSub")}</span>
         </a>
         <form className="cmd" onSubmit={submit}>
           <input
             id="al-input"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="输入对方昵称或编号(UID)，回车查询"
+            placeholder={t("delta.searchPlaceholder")}
             autoComplete="off"
           />
-          <button id="al-go" type="submit" aria-label="查询">查 询</button>
+          {busy ? (
+            <button id="al-go" type="button" className="danger" onClick={onStop}>{t("delta.stopTask")}</button>
+          ) : (
+            <button id="al-go" type="submit" aria-label={t("delta.search")} disabled={!ready}>{t("delta.search")}</button>
+          )}
         </form>
         <div className="top-meta">
-          <span id="al-stats">本机档案 {recordCount}</span>
-          <a className="al-cal" href="/">工具中心</a>
+          <span id="al-stats">{t("delta.localRecords")} {recordCount}</span>
+          {usage ? <span>{t("delta.usage", { used: usage.today_count, limit: usage.daily_limit })}</span> : null}
+          <button className="al-cal" type="button" onClick={onCalibration}>{t("delta.calibration")}</button>
         </div>
       </header>
-      <div id="al-status">
+      <div id="al-status" className={status?.text ? "is-visible" : ""}>
         {status?.text ? (
           <span
             className={`pill pill-${status.kind || "warn"}`}

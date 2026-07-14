@@ -62,12 +62,12 @@ describe("AdminMilkTeaPage", () => {
     const user = userEvent.setup();
     render(<AdminMilkTeaPage />);
 
-    await user.type(screen.getByLabelText("Admin password"), "secret");
-    await user.click(screen.getByRole("button", { name: "Log in" }));
+    await user.type(screen.getByLabelText("管理密码"), "secret");
+    await user.click(screen.getByRole("button", { name: "进入管理台" }));
 
-    expect(await screen.findByText("2 orders")).toBeInTheDocument();
-    expect(screen.getByText("¥36 revenue")).toBeInTheDocument();
-    expect(screen.getByText("Brown Sugar Milk Tea")).toBeInTheDocument();
+    expect(await screen.findByText("2 单")).toBeInTheDocument();
+    expect(screen.getByText("¥36")).toBeInTheDocument();
+    expect(screen.getByText("黑糖珍珠鲜奶")).toBeInTheDocument();
     expect(screen.getByText("ORDER007")).toBeInTheDocument();
   });
 
@@ -75,16 +75,16 @@ describe("AdminMilkTeaPage", () => {
     const fetchMock = stubAdminApi();
     const user = userEvent.setup();
     render(<AdminMilkTeaPage />);
-    await user.type(screen.getByLabelText("Admin password"), "secret");
-    await user.click(screen.getByRole("button", { name: "Log in" }));
-    const form = await screen.findByRole("form", { name: "Create product" });
+    await user.type(screen.getByLabelText("管理密码"), "secret");
+    await user.click(screen.getByRole("button", { name: "进入管理台" }));
+    const form = await screen.findByRole("form", { name: "新增商品" });
 
-    await user.type(within(form).getByLabelText("Product name"), "Taro Milk");
-    await user.type(within(form).getByLabelText("Category"), "Milk Tea");
-    await user.type(within(form).getByLabelText("Price"), "19");
-    await user.type(within(form).getByLabelText("Description"), "Taro and milk.");
-    await user.click(within(form).getByRole("button", { name: "Create product" }));
-    await user.click(screen.getByRole("button", { name: "Mark ready" }));
+    await user.type(within(form).getByLabelText("商品名称"), "香芋牛乳");
+    await user.type(within(form).getByLabelText("分类"), "奶茶");
+    await user.type(within(form).getByLabelText("价格"), "19");
+    await user.type(within(form).getByLabelText("商品描述"), "香芋与鲜牛乳。 ");
+    await user.click(within(form).getByRole("button", { name: "新增商品" }));
+    await user.click(screen.getByRole("button", { name: "通知取餐" }));
 
     expect(fetchMock.mock.calls.some(([path, options]) =>
       path === "/api/admin/milk-tea/products" && options.method === "POST",

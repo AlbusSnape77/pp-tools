@@ -1,0 +1,323 @@
+"""Parse OCR tokens from Delta Force screens into structured fields.
+
+Tokens are dicts: {"text", "x", "y", "x2", "y2", "score"}.
+Extraction uses label-anchoring (find a label token, then the value directly
+below it or to its right on the same row), with tolerances relative to image
+size so it generalises across resolutions.
+"""
+import re
+
+# ---- token geometry helpers ------------------------------------------------
+
+
+def cx(t):
+    return (t["x"] + t["x2"]) / 2
+
+
+def cy(t):
+    return (t["y"] + t["y2"]) / 2
+
+
+def find_label(tokens, name, exact=False):
+    """First token whose text equals (exact) or contains (default) `name`."""
+    for t in tokens:
+        txt = t.get("text", "")
+        if (txt == name) if exact else (name in txt):
+            return t
+    return None
+
+
+def value_below(tokens, label, W, H, x_tol_ratio=0.05):
+    """Nearest token centred roughly under `label` and below it."""
+    if not label:
+        return None
+    x_tol = x_tol_ratio * W
+    y_max = 0.07 * H
+    best, best_dy = None, None
+    for t in tokens:
+        if t is label:
+            continue
+        dy = cy(t) - cy(label)
+        if dy <= 0 or dy > y_max:
+            continue
+        if abs(cx(t) - cx(label)) > x_tol:
+            continue
+        if best is None or dy < best_dy:
+            best, best_dy = t, dy
+    return best
+
+
+def value_right(tokens, label, W, H, numeric=False):
+    """Nearest token to the right of `label` on the same row, within the same
+    column block. If numeric=True, only number-like tokens are considered, so a
+    missing value does not pick up the next label or a far-away column's value."""
+    if not label:
+        return None
+    y_tol = 0.02 * H
+    max_dx = 0.22 * W  # values live near their label; reject cross-column bleed
+    best, best_dx = None, None
+    for t in tokens:
+        if t is label:
+            continue
+        if abs(cy(t) - cy(label)) > y_tol:
+            continue
+        dx = t["x"] - label["x2"]
+        if dx <= -5 or dx > max_dx:
+            continue
+        if numeric and not is_number_token(t["text"]):
+            continue
+        if best is None or dx < best_dx:
+            best, best_dx = t, dx
+    return best
+
+
+def txt(tok):
+    return tok["text"].strip() if tok else None
+
+
+# ---- value normalisers -----------------------------------------------------
+
+_INT_RE = re.compile(r"^\s*[★\s]*(\d+)\s*$")
+_NUM_TOKEN_RE = re.compile(r"^[\d.,]+[%MmKkBbHh]?$")
+
+
+def as_int(s):
+    if not s:
+        return None
+    m = re.search(r"-?\d+", s.replace(",", ""))
+    return int(m.group()) if m else None
+
+
+def is_number_token(s):
+    s = s.strip()
+    return bool(_NUM_TOKEN_RE.match(s)) or s.startswith("★")
+
+
+# ---- radar (五维) ----------------------------------------------------------
+
+
+def parse_radar(tokens, W, H):
+    """Return {战斗,生存,合作,搜索,财富} ints. 战斗 has no text label (top vertex),
+    so it is taken as the top-most numeric value in the radar region.
+
+    x_min must clear the pentagon's LEFT vertex (财富): measured live its value
+    sits at x≈0.711, so the old 0.72 cut silently dropped 财富 every time."""
+    x_min, y_min, y_max = 0.66 * W, 0.27 * H, 0.55 * H
+    vals = [
+        t for t in tokens
+        if cx(t) > x_min and y_min < cy(t) < y_max and as_int(t["text"]) is not None
+        and len(re.sub(r"\D", "", t["text"])) <= 3
+    ]
+    if not vals:
+        return {}
+    labels = {n: find_label(tokens, n, exact=True) for n in ("财富", "生存", "搜索", "合作")}
+    labels = {n: l for n, l in labels.items() if l and cx(l) > x_min}
+
+    radar = {}
+    vals_sorted = sorted(vals, key=cy)
+    top = vals_sorted[0]
+    radar["战斗"] = as_int(top["text"])
+    rest = vals_sorted[1:]
+
+    used = set()
+    for name, lab in labels.items():
+        best, best_d = None, None
+        for i, v in enumerate(rest):
+            if i in used:
+                continue
+            d = (cx(v) - cx(lab)) ** 2 + (cy(v) - cy(lab)) ** 2
+            if best is None or d < best_d:
+                best, best_d, best_i = v, d, i
+        if best is not None:
+            radar[name] = as_int(best["text"])
+            used.add(best_i)
+    return radar
+
+
+# ---- overview / ranked -----------------------------------------------------
+
+# All ranked tiers, not just 三角洲巅峰. Sub-tier numerals come from OCR either
+# as Unicode Ⅰ-Ⅴ (live frames give 铂金Ⅱ = U+2161) or ASCII I/V runs; the ranked
+# tab sometimes drops the numeral entirely (token is just 铂金), so it's optional.
+# 白金 is RapidOCR's frequent misread of 铂金 and is normalised back to it.
+_RANK_RE = re.compile(r"(?:三角洲巅峰|黑鹰|钻石|铂金|白金|黄金|白银|青铜)\s*[ⅠⅡⅢⅣⅤIV]{0,4}")
+_STAR_RE = re.compile(r"[★☆]\s*(\d+)")
+
+
+def find_rank(tokens):
+    """First token containing a ranked-tier name (三角洲巅峰 / 铂金Ⅱ / 黄金IV…)."""
+    for t in tokens:
+        if _RANK_RE.search(t.get("text", "")):
+            return t
+    return None
+
+
+def parse_overview(tokens, W, H):
+    """Parse 数据总览 or 排位赛 (identical layout). Returns a dict of fields.
+    KD (战损比) is returned raw plus its bounding box for re-crop OCR."""
+    out = {}
+
+    season = find_label(tokens, "S9", exact=False)
+    out["season"] = txt(season)
+
+    rank_tok = find_rank(tokens)
+    out["rank_name"] = out["rank_star"] = out["rank_score"] = None
+    if rank_tok:
+        out["rank_name"] = _RANK_RE.search(rank_tok["text"]).group(0).strip().replace("白金", "铂金")
+        # ★N is normally its own token to the right, but OCR sometimes merges it
+        # into the rank-name token — check the same token first.
+        star = _STAR_RE.search(rank_tok["text"])
+        out["rank_star"] = int(star.group(1)) if star else as_int(txt(value_right(tokens, rank_tok, W, H)))
+        out["rank_score"] = as_int(txt(value_below(tokens, rank_tok, W, H)))
+        # value_below can grab the ★N star token instead of the real score
+        # (seen live: ranked 段位分 = 12 == rank_star) — a real score is ≥3 digits
+        if out["rank_score"] is not None and (
+                out["rank_score"] == out["rank_star"] or out["rank_score"] < 100):
+            out["rank_score"] = None
+
+    out["matches"] = as_int(txt(value_below(tokens, find_label(tokens, "战局数"), W, H)))
+    out["play_hours"] = txt(value_below(tokens, find_label(tokens, "游戏时长"), W, H))
+
+    out["radar"] = parse_radar(tokens, W, H)
+
+    out["profit_ratio"] = txt(value_below(tokens, find_label(tokens, "赚损比"), W, H))
+    out["escape_rate"] = txt(value_below(tokens, find_label(tokens, "撤离率"), W, H))
+    # The full-frame detector sometimes misses the value under a label entirely
+    # (seen live: 排位赛 赚损比 -> nothing). When the label exists but its value
+    # didn't, hand the caller a crop box right under the label so it can run
+    # recognition-only OCR there (same trick as the KD cell / kill counts).
+    out["_value_boxes"] = {}
+    for key, lab_txt in (("profit_ratio", "赚损比"), ("escape_rate", "撤离率")):
+        if out.get(key) is None:
+            lab = find_label(tokens, lab_txt)
+            if lab:
+                out["_value_boxes"][key] = [
+                    int(lab["x"] - 0.01 * W), int(lab["y2"] + 2),
+                    int(lab["x2"] + 0.05 * W), int(lab["y2"] + 0.05 * H),
+                ]
+
+    kd_label = find_label(tokens, "战损比")
+    kd_val = value_below(tokens, kd_label, W, H, x_tol_ratio=0.08)
+    out["kd_raw"] = txt(kd_val)
+    out["kd_box"] = [kd_val["x"], kd_val["y"], kd_val["x2"], kd_val["y2"]] if kd_val else None
+
+    # sub-rows (label -> value to the right)
+    pairs = {
+        "carry_value": "带出价值",
+        "action_reward": "累计行动报酬",
+        "mandel_bricks": "累计破译曼德尔砖",
+        "kills": "击败干员",
+        "hit_rate": "命中率",
+        "precise_kill_rate": "精准击败率",
+        "carry_teammate_value": "带出队友价值",
+        "rescue_teammate": "救助队友",
+        "revive_teammate": "复活队友",
+    }
+    for key, label in pairs.items():
+        out[key] = txt(value_right(tokens, find_label(tokens, label), W, H, numeric=True))
+    return out
+
+
+def split_kd(values_text):
+    """Best-effort split of a merged KD string like '7.21.21.9' -> [7.2,1.2,1.9].
+    NOTE: unreliable; the server should prefer re-cropping the KD box. Used as fallback."""
+    if not values_text:
+        return []
+    nums = re.findall(r"\d+\.\d|\d+", values_text)
+    return nums
+
+
+# ---- recent matches --------------------------------------------------------
+
+
+def parse_recent(tokens, W, H):
+    """Return {hidden: bool, matches: [...]} from the 最近/历史战绩 list."""
+    # a match "row" is a 2-line block (result on top, map+time below), so the
+    # band must be wide enough to include the line below but not the next match.
+    y_tol = 0.05 * H
+    results = ("撤离成功", "撤离失败", "中途退出")
+    anchors = [t for t in tokens if any(result in t["text"] for result in results)]
+    matches = []
+    for a in anchors:
+        row = [t for t in tokens if abs(cy(t) - cy(a)) < y_tol and t is not a]
+        info = {"result": next(result for result in results if result in a["text"])}
+        # map + time (left, contains a date/time)
+        mt = next((t for t in row if re.search(r"\d{1,2}:\d{2}", t["text"])), None)
+        info["map_time"] = txt(mt)
+        # 哈夫币: the large comma number near the middle (live-measured cx≈0.346,
+        # so the band starts at 0.30 — the old 0.35 cut sat right on the edge)
+        hafu = None
+        for token in row:
+            if not 0.30 * W < cx(token) < 0.6 * W:
+                continue
+            number = re.search(r"\d[\d.,]{3,}", token["text"])
+            if number:
+                hafu = number.group(0)
+                if re.fullmatch(r"\d{1,3}\.\d{3}", hafu):
+                    hafu = hafu.replace(".", ",")
+                break
+        info["hafu"] = hafu
+        # rank change: right side token containing parentheses like 8130(-18)
+        rc = next((t for t in row if "(" in t["text"] or ")" in t["text"]), None)
+        info["rank_change"] = txt(rc)
+        # kills: a lone small digit next to its icon (x≈0.40) that full-frame OCR
+        # usually misses — keep the row's y so lookup can re-crop and recognise it.
+        info["row_y"] = int(cy(a))
+        matches.append(info)
+    return {"hidden": len(matches) == 0, "matches": matches}
+
+
+# ---- home ------------------------------------------------------------------
+
+
+def parse_home(tokens, W, H):
+    """Parse 首页: nickname, title, season summary numbers, collection/almanac."""
+    out = {}
+    known_labels = {
+        "角色信息", "烽火地带", "全面战场", "个人信息", "历史战绩", "详细数据",
+        "账号成就", "社交定制", "信誉档案", "当前赛季", "赛季最高", "收藏室",
+        "成就徽章", "总战局", "总资产", "游戏时长", "撤离率", "击败干员",
+        "赚损比", "高校特权", "游戏中心启动", "三角洲巅峰", "图鉴收集",
+    }
+
+    # Player UID: a long digit run in the right half (e.g. "鼠牛:1826…" or
+    # "45130520…"). Watermark token "CNUID:…" is excluded.
+    uid = None
+    for t in tokens:
+        s = t["text"]
+        if "CNUID" in s or "ms" in s:
+            continue
+        if cx(t) < 0.45 * W:
+            continue
+        digits = re.sub(r"\D", "", s)
+        if len(digits) >= 15 and (uid is None or len(digits) > len(uid)):
+            uid = digits
+    out["uid"] = uid
+
+    # The right-side character panel stacks: [信誉状态] / 昵称 / 称号 / 玩家ID.
+    # Nickname = topmost remaining token after excluding the credit-status badge,
+    # numbers, the long player-ID line, and known labels. Title = the token below it.
+    STATUS_HINTS = ("环境", "信誉", "状态", "在线", "离线", "良好")
+    cands = []
+    for t in tokens:
+        s = t["text"].strip()
+        if cx(t) < 0.55 * W or cy(t) < 0.70 * H:
+            continue
+        if not re.search(r"[一-鿿A-Za-z]", s):       # must contain CJK or letters
+            continue
+        if s in known_labels or s.startswith("CN") or is_number_token(s) or "ms" in s:
+            continue
+        if any(h in s for h in STATUS_HINTS):          # 信誉/安全状态徽章，如"安全环境良好"
+            continue
+        if "鼠牛" in s or re.search(r"\d{6,}", s):      # 玩家ID / UID 行
+            continue
+        cands.append(t)
+    cands.sort(key=cy)
+    out["nickname"] = txt(cands[0]) if cands else None
+    out["title"] = txt(cands[1]) if len(cands) > 1 else None
+
+    out["total_assets"] = txt(value_below(tokens, find_label(tokens, "总资产"), W, H))
+    out["total_matches"] = as_int(txt(value_below(tokens, find_label(tokens, "总战局"), W, H)))
+    almanac = find_label(tokens, "图鉴收集")
+    out["almanac"] = as_int(txt(almanac))
+    return out

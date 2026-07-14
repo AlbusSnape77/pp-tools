@@ -1,0 +1,95 @@
+{
+  "source_root": "E:\\A Study\\Coding\\Delta Force",
+  "files": [
+    {
+      "path": "dfstats/__init__.py",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "dfstats/automate.py",
+      "size": 53497,
+      "sha256": "db2370c0d1984a942bd25b8e8e7a9ca3b1e972053d72b842c9b83d518ddd6b2f"
+    },
+    {
+      "path": "dfstats/classify.py",
+      "size": 1122,
+      "sha256": "29cdd155b6510006fc3113f75d6d7f7fab7f93870c6ffc71d8de9519852b4823"
+    },
+    {
+      "path": "dfstats/imgio.py",
+      "size": 947,
+      "sha256": "c7baf0e55cbac0258fca451d1f6e53d7af1ca390926bf72c1a1e938289db4553"
+    },
+    {
+      "path": "dfstats/jobs.py",
+      "size": 10236,
+      "sha256": "601fda8e5c67ad7d7bc4f9b3c4c8cd3b55ca41f316d748f542ffb26fb0c0cc2f"
+    },
+    {
+      "path": "dfstats/lookup.py",
+      "size": 4539,
+      "sha256": "86faf03578c76f33cf7ec92c6e655a1a9313633dc55838c87459d72b2671d75e"
+    },
+    {
+      "path": "dfstats/notify.py",
+      "size": 2890,
+      "sha256": "ab3f65228ef99f740c10f164f175a930796adb8c6e35e0d3ccd163de2b132adc"
+    },
+    {
+      "path": "dfstats/ocr.py",
+      "size": 7968,
+      "sha256": "2c0092b1909d47154b371f47346a47cc4ae73f4f10ddb5ba93e6b53404ce8d56"
+    },
+    {
+      "path": "dfstats/parse.py",
+      "size": 12625,
+      "sha256": "76d961c656240b036fb887dcd923c085df6ab459e89886111c45a44e48fa37ba"
+    },
+    {
+      "path": "dfstats/paths.py",
+      "size": 1039,
+      "sha256": "239c590ac9b39fe960422620bb07f728a7b9bd7fe2e2395ec20790a0f2548aea"
+    },
+    {
+      "path": "dfstats/server.py",
+      "size": 5827,
+      "sha256": "9d1852fbbeb0737830b8b824b5404adec44834691f948bace441a335532e7c42"
+    },
+    {
+      "path": "dfstats/store.py",
+      "size": 3765,
+      "sha256": "32891a6c9841d62fa14403a869649c7a906ee00a4587e202ad9cd831912311e6"
+    },
+    {
+      "path": "requirements.txt",
+      "size": 81,
+      "sha256": "3106108c7c4f4deecf1352afc0fa0d1e6579e0f70a2a4e101754b509e1063b48"
+    },
+    {
+      "path": "test_parse.py",
+      "size": 6335,
+      "sha256": "cfcc0d5ddf89005d9d90c742ff7ac7726a86aa8af09adc111d1bde1584136377"
+    },
+    {
+      "path": "web/app.js",
+      "size": 23728,
+      "sha256": "45ab19a5233461e9a362c5324b272a0d5ee5b579e01059052ec79e1ca15490a1"
+    },
+    {
+      "path": "web/calibrate.html",
+      "size": 11483,
+      "sha256": "b7c71fce108ee8d1888f0012a83728d9b9602edf55e0384c538aca0fdeed55ae"
+    },
+    {
+      "path": "web/index.html",
+      "size": 1994,
+      "sha256": "e14a7cf4843de852db9b8b1f97ba374bca05622aa858c4616117ba69cd9d216d"
+    },
+    {
+      "path": "web/styles.css",
+      "size": 15438,
+      "sha256": "e8dbdd30fd3f9453b07aafcc8106430f368dfe4f0bd89f27b9683c4e71f5ad37"
+    }
+  ]
+}

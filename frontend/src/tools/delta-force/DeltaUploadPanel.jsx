@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "../../i18n/I18nContext";
 
 const imageFiles = (files) => Array.from(files || []).filter((file) => file?.type?.startsWith("image/"));
 
 export default function DeltaUploadPanel({ files, busy, message, onAddFiles, onClear, onAnalyze }) {
+  const { t } = useI18n();
   const detailsRef = useRef(null);
   const [previews, setPreviews] = useState([]);
 
@@ -33,8 +35,8 @@ export default function DeltaUploadPanel({ files, busy, message, onAddFiles, onC
   return (
     <details id="upload" ref={detailsRef}>
       <summary>
-        手动上传截图
-        <span className="sum-hint">备用 · 拖入或 Ctrl+V 粘贴 4 张资料页截图</span>
+        {t("delta.uploadTitle")}
+        <span className="sum-hint">{t("delta.uploadHint")}</span>
       </summary>
       <div
         id="drop"
@@ -47,7 +49,7 @@ export default function DeltaUploadPanel({ files, busy, message, onAddFiles, onC
       >
         <input
           id="files"
-          aria-label="资料页截图"
+          aria-label={t("delta.fileAria")}
           type="file"
           accept="image/*"
           multiple
@@ -56,18 +58,21 @@ export default function DeltaUploadPanel({ files, busy, message, onAddFiles, onC
             event.target.value = "";
           }}
         />
-        <div className="hint">拖入 / 粘贴(Ctrl+V) / 选择 4 张截图（数据总览·排位赛·最近战绩·首页），顺序随意</div>
+        <div className="hint">{t("delta.dropHint")}</div>
         <div id="thumbs">
           {previews.map(({ file, url }, index) => (
-            <img key={`${file.name}-${file.size}-${index}`} src={url} alt={file.name || `截图 ${index + 1}`} />
+            <figure className="thumb" key={`${file.name}-${file.size}-${index}`}>
+              <img src={url} alt={file.name || `${t("delta.fileAria")} ${index + 1}`} />
+              <figcaption className="thumb-name">{file.name}</figcaption>
+            </figure>
           ))}
         </div>
         <div className="row">
-          <span>已选 <span id="count">{files.length}</span> 张</span>
+          <span>{t("delta.selected")} <span id="count">{files.length}</span> {t("delta.images")}</span>
           <button id="analyze" type="button" onClick={onAnalyze} disabled={busy}>
-            {busy ? "识别中…" : "识别并记录"}
+            {busy ? t("delta.analyzing") : t("delta.analyze")}
           </button>
-          <button id="clear" type="button" className="ghost" onClick={onClear} disabled={busy}>清空</button>
+          <button id="clear" type="button" className="ghost" onClick={onClear} disabled={busy}>{t("common.clear")}</button>
         </div>
         <div id="upmsg">{message}</div>
       </div>

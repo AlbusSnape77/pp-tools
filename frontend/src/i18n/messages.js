@@ -1,0 +1,366 @@
+export const SUPPORTED_LANGUAGES = ["zh", "en", "ja"];
+
+export const messages = {
+  zh: {
+    common: {
+      back: "返回工具中心", loading: "正在加载…", retry: "重试", unavailable: "暂时不可用",
+      save: "保存", delete: "删除", clear: "清空", collapse: "收起", copy: "复制",
+    },
+    home: {
+      kicker: "PP TOOLS · ONLINE SUITE", title: "我的在线工具箱",
+      summary: "两个网页工具和一个小程序源码项目。", aria: "在线工具",
+      footer: "返回个人网站", featuresAria: "{title}主要功能", enterTool: "进入{title}", downloadSource: "下载{title}小程序源码",
+      delta: {
+        eyebrow: "战绩情报工作台", title: "Delta 战绩分析",
+        description: "上传资料页截图，自动整理玩家数据、KD 对比、五维能力和最近战绩。",
+        features: ["截图识别", "玩家档案", "本地花名册"], action: "查看战绩", status: "可直接使用",
+        imageAlt: "Delta 战绩分析玩家档案界面",
+      },
+      camera: {
+        eyebrow: "浏览器实时影像", title: "手势美颜相机",
+        description: "在浏览器中完成实时美颜、滤镜、手势特效和本地拍照。",
+        features: ["实时美颜", "手势控制", "本地拍照"], action: "打开相机", status: "可直接使用",
+        imageAlt: "手势美颜相机实时预览界面",
+      },
+      milkTea: {
+        eyebrow: "微信原生小程序", title: "三平方奶茶店",
+        description: "下载完整源码，使用微信开发者工具导入；内置本地演示模式。",
+        features: ["原生小程序", "本地演示", "云开发可选"], action: "查看源码", status: "源码可下载",
+        imageAlt: "三平方奶茶店商品与点单界面",
+      },
+    },
+    milkTea: {
+      title: "三平方奶茶店小程序", intro: "完整的微信原生小程序源码，可直接导入微信开发者工具。",
+      download: "下载小程序源码", importTitle: "导入方式",
+      steps: ["下载并解压源码包", "在微信开发者工具中导入解压目录", "使用测试号或自己的 AppID 编译运行"],
+      demoTitle: "默认本地演示", demoText: "无需云环境即可体验商品、购物车、下单、订单和管理功能。",
+      cloudTitle: "云开发可选", cloudText: "配置自己的云环境后，可以切换到云开发模式。",
+    },
+    delta: {
+      brandSub: "烽火地带 · 战绩分析", searchPlaceholder: "输入对方昵称或编号(UID)，回车查询",
+      search: "查询", localRecords: "本机档案", filter: "筛选花名册…", emptyRoster: "花名册暂无记录",
+      uploadTitle: "手动上传截图", uploadHint: "备用 · 拖入或 Ctrl+V 粘贴 4 张资料页截图",
+      fileAria: "资料页截图", dropHint: "拖入 / 粘贴（Ctrl+V）/ 选择 4 张截图，顺序随意",
+      selected: "已选", images: "张", analyze: "识别并记录", analyzing: "识别中…",
+      added: "已加入 {count} 张截图", selectFirst: "请先选择、拖入或粘贴图片",
+      running: "正在识别截图，请稍候…", reading: "本机正在读取资料页",
+      failed: "截图识别失败", noData: "没有识别到可用资料，请检查截图后重试",
+      partial: "部分字段未识别，已保存可用资料", complete: "识别完成：{name}",
+      stored: "识别完成并已写入本机花名册", offline: "本机识别服务未启动，请先启动 PP Tools 后端。",
+      notFound: "本机花名册中没有找到该玩家，请上传截图建立档案",
+      found: "已从本机花名册找到：{name}", saved: "档案已保存到当前浏览器", removed: "档案已删除",
+      choosePlayer: "从左侧花名册选择玩家，或在顶部直接查询", nickname: "玩家昵称",
+      tags: "玩家标签", tagsPlaceholder: "标签，逗号分隔", note: "玩家备注", notePlaceholder: "记录你的观察…",
+      confirmDelete: "删除「{name}」的档案？", updated: "更新于 {time}", overview: "数据总览",
+      ranked: "排位赛", recent: "最近战绩", noRecent: "暂无最近战绩", noOverview: "暂无总览或排位数据",
+      more: "更多数据 ▾", less: "收起 ▴", unknownPlayer: "未命名玩家",
+      comparison: "总览 / 排位 对比", actualLevel: "真实水平", overviewRadar: "总览 五维", rankedRadar: "排位 五维",
+      summaryLabels: ["总览 绝密KD", "排位 绝密KD", "撤离率", "段位", "赚损比", "总场次", "总资产"],
+      metricLabels: ["段位", "段位分", "撤离率", "赚损比", "场次", "时长"],
+      detailLabels: ["命中率", "精准击败率", "带出价值", "累计行动报酬", "曼德尔砖", "带出队友价值", "救助队友", "复活队友"],
+      kdLabels: ["普通", "机密", "绝密"], radarAxes: ["战斗", "生存", "合作", "搜索", "财富"],
+      verdicts: { "v-top": "大佬", "v-good": "高手", "v-mid": "普通", "v-low": "萌新" },
+      hiddenRecent: "对方隐藏了战绩", rounds: "{count} 场", evacuationSummary: "撤离 {wins} 场 · {rate}%", totalKills: "总击杀 {count}",
+      matchHeaders: ["结果", "地图", "难度", "击杀", "带出", "排位分", "时间"], evacuated: "✓ 撤离", eliminated: "× 阵亡", leftEarly: "中途退出",
+      killCount: "{count} 击杀", currency: "{value} 哈夫币", absoluteKd: "绝密 KD", evacuation: "撤离",
+      copyResultImage: "复制结果图", saveResultImage: "保存结果图", resultImageCopied: "结果图已复制", resultImageSaved: "结果图已保存", resultImageFailed: "生成结果图失败，请改用保存功能",
+      connection: {
+        ready: "本机 Companion 已连接", launch: "启动 Companion", download: "下载 Companion", retry: "重新检测",
+        code: "6 位配对码", pair: "配对", revoke: "撤销配对",
+        states: {
+          checking: "正在检测本机 Companion", unavailable: "本机 Companion 尚未运行", launching: "正在唤起 Companion",
+          permission_denied: "浏览器拒绝了本机连接权限", pairing_required: "输入 Companion 窗口中的 6 位配对码",
+          pairing: "正在配对", ready: "已连接", version_incompatible: "Companion 版本需要更新", error: "连接 Companion 时发生错误",
+        },
+      },
+      cancel: "取消", stopTask: "停止任务", calibration: "校准", usage: "今日 {used}/{limit}",
+      countdownTitle: "自动查询倒计时", countdownText: "倒计时结束后将暂时接管鼠标和键盘",
+      jobStates: { pending: "等待执行", running: "查询进行中", done: "查询完成", error: "查询失败", cancelled: "任务已停止" },
+      jobSteps: {
+        prepare_game: "准备游戏", open_social: "打开社交面板", type_query: "输入昵称或 UID", search: "搜索玩家",
+        open_result: "打开玩家资料", capture_home: "截取主页", capture_overview: "截取数据总览",
+        capture_ranked: "截取排位数据", capture_recent: "截取最近战绩", ocr: "本地识别", store: "保存玩家档案",
+      },
+      calibrationPage: {
+        title: "Delta 站内校准", intro: "获取当前桌面截图，拖拽框选控件区域并保存为备用模板。", back: "返回 Delta",
+        capture: "获取桌面截图", template: "校准模板", saveCrop: "保存所选区域", screenshotAlt: "当前桌面截图",
+        captured: "桌面截图已获取，请拖拽框选区域", saved: "模板已保存", deleted: "模板已删除", failed: "校准操作失败",
+        ready: "已保存", missing: "未保存", deleteTemplate: "删除 {name} 模板",
+      },
+    },
+    camera: {
+      title: "手势美颜相机", intro: "实时美颜、柔和滤镜与手势粒子，在浏览器里完成拍摄。",
+      privacy: "画面仅在本地处理", controls: "美颜控制台", local: "本地处理", openControls: "打开控制台",
+      closeControls: "收起", filter: "滤镜", originalHold: "按住看原图", switchCamera: "切换镜头",
+      capture: "拍照", stop: "关闭相机", stage: "相机画面", canvas: "实时美颜画面",
+      readyTitle: "准备好你的专属镜头", readyText: "画面只在当前浏览器处理，不会上传。", start: "开启相机",
+      connectingTitle: "正在连接摄像头", connectingText: "请在浏览器提示中允许摄像头权限。",
+      errorTitle: "摄像头没有启动", detectAgain: "重新检测", running: "相机已开启", modelRetry: "重试检测",
+      preview: "照片预览", photoReady: "照片已准备好", previewText: "确认画面后保存到你的设备，或返回重新拍摄。",
+      photoAlt: "刚刚拍摄的美颜照片", retake: "重新拍摄", download: "保存图片",
+      modelIdle: "模型待机", modelLoading: "模型加载中", modelReady: "模型已就绪",
+      modelFailed: "模型加载失败，可重试", modelPaused: "检测已暂停，可重新检测",
+      gestureIdle: "张开手掌、捏合或举起双手试试看", gestureHeart: "双手爱心已绽放",
+      gesturePinch: "捏合闪光已触发", gesturePalm: "手掌粒子已触发",
+      permission: "请在浏览器地址栏允许摄像头权限，然后重新检测。",
+      notFound: "没有找到可用摄像头，请连接设备后重新检测。",
+      busy: "摄像头正在被其他程序占用，请关闭占用程序后重试。",
+      unsupported: "当前浏览器不支持摄像头访问，请使用较新的浏览器。",
+      genericError: "摄像头启动失败，请检查设备后重新检测。",
+      parameters: { skin: "磨皮", white: "美白", slim: "瘦脸", eye: "大眼", blush: "红润" },
+      filters: { original: "原图", cream: "奶油", peach: "蜜桃", "first-love": "初恋", cherry: "樱花" },
+    },
+  },
+  en: {
+    common: {
+      back: "Back to tools", loading: "Loading…", retry: "Retry", unavailable: "Unavailable",
+      save: "Save", delete: "Delete", clear: "Clear", collapse: "Collapse", copy: "Copy",
+    },
+    home: {
+      kicker: "PP TOOLS · ONLINE SUITE", title: "My Online Toolbox",
+      summary: "Two browser tools and one mini program source project.", aria: "Online tools",
+      footer: "Back to personal site", featuresAria: "{title} features", enterTool: "Open {title}", downloadSource: "Download {title} source",
+      delta: {
+        eyebrow: "Match intelligence workspace", title: "Delta Stats Analyzer",
+        description: "Upload profile screenshots to organize player data, KD comparisons, abilities, and recent matches.",
+        features: ["Screenshot recognition", "Player profiles", "Local roster"], action: "View stats", status: "Ready to use",
+        imageAlt: "Delta player profile dashboard",
+      },
+      camera: {
+        eyebrow: "Live browser camera", title: "Gesture Beauty Camera",
+        description: "Apply live beauty effects, filters, gesture effects, and take photos in your browser.",
+        features: ["Live beauty", "Gesture control", "Local photos"], action: "Open camera", status: "Ready to use",
+        imageAlt: "Gesture beauty camera preview",
+      },
+      milkTea: {
+        eyebrow: "Native WeChat mini program", title: "Sanpingfang Milk Tea",
+        description: "Download the complete source and import it into WeChat DevTools with built-in local demo mode.",
+        features: ["Native mini program", "Local demo", "Optional cloud mode"], action: "View source", status: "Source available",
+        imageAlt: "Sanpingfang milk tea ordering interface",
+      },
+    },
+    milkTea: {
+      title: "Sanpingfang Milk Tea Mini Program", intro: "Complete native WeChat Mini Program source ready for WeChat DevTools.",
+      download: "Download source", importTitle: "How to import",
+      steps: ["Download and extract the package", "Import the extracted folder in WeChat DevTools", "Build with a test account or your own AppID"],
+      demoTitle: "Local demo by default", demoText: "Try products, cart, checkout, orders, and admin features without a cloud environment.",
+      cloudTitle: "Optional cloud mode", cloudText: "Configure your own cloud environment to switch to cloud mode.",
+    },
+    delta: {
+      brandSub: "Operations · Stats Analysis", searchPlaceholder: "Enter nickname or UID and press Enter",
+      search: "Search", localRecords: "Local profiles", filter: "Filter roster…", emptyRoster: "No local profiles yet",
+      uploadTitle: "Upload screenshots", uploadHint: "Fallback · drop or paste four profile screenshots",
+      fileAria: "Profile screenshots", dropHint: "Drop, paste, or select four screenshots in any order",
+      selected: "Selected", images: "images", analyze: "Analyze and save", analyzing: "Analyzing…",
+      added: "Added {count} screenshots", selectFirst: "Select, drop, or paste images first",
+      running: "Analyzing screenshots…", reading: "Reading profile pages locally",
+      failed: "Screenshot analysis failed", noData: "No usable profile data was found. Check the screenshots and retry.",
+      partial: "Some fields were not recognized; available data was saved", complete: "Completed: {name}",
+      stored: "Completed and saved to the local roster", offline: "Local recognition service is offline. Start the PP Tools backend first.",
+      notFound: "Player not found locally. Upload screenshots to create a profile.",
+      found: "Found in local roster: {name}", saved: "Profile saved in this browser", removed: "Profile deleted",
+      choosePlayer: "Choose a player from the roster or search above", nickname: "Player nickname",
+      tags: "Player tags", tagsPlaceholder: "Comma-separated tags", note: "Player note", notePlaceholder: "Record your observations…",
+      confirmDelete: "Delete the profile for “{name}”?", updated: "Updated {time}", overview: "Overview",
+      ranked: "Ranked", recent: "Recent matches", noRecent: "No recent matches", noOverview: "No overview or ranked data",
+      more: "More data ▾", less: "Collapse ▴", unknownPlayer: "Unnamed player",
+      comparison: "Overview / Ranked comparison", actualLevel: "Actual level", overviewRadar: "Overview abilities", rankedRadar: "Ranked abilities",
+      summaryLabels: ["Overview Secret KD", "Ranked Secret KD", "Escape rate", "Rank", "Profit ratio", "Total matches", "Total assets"],
+      metricLabels: ["Rank", "Rank score", "Escape rate", "Profit ratio", "Matches", "Play time"],
+      detailLabels: ["Hit rate", "Precision kill rate", "Extracted value", "Action rewards", "Mandel bricks", "Teammate value", "Teammate rescues", "Teammate revives"],
+      kdLabels: ["Normal", "Confidential", "Secret"], radarAxes: ["Combat", "Survival", "Support", "Search", "Wealth"],
+      verdicts: { "v-top": "Elite", "v-good": "Expert", "v-mid": "Standard", "v-low": "Rookie" },
+      hiddenRecent: "Match history is hidden", rounds: "{count} matches", evacuationSummary: "Extracted {wins} · {rate}%", totalKills: "Total kills {count}",
+      matchHeaders: ["Result", "Map", "Difficulty", "Kills", "Extracted", "Rank score", "Time"], evacuated: "✓ Extracted", eliminated: "× Eliminated", leftEarly: "Left early",
+      killCount: "{count} kills", currency: "{value} coins", absoluteKd: "Secret KD", evacuation: "Escape",
+      copyResultImage: "Copy result image", saveResultImage: "Save result image", resultImageCopied: "Result image copied", resultImageSaved: "Result image saved", resultImageFailed: "Could not create the result image; use Save instead",
+      connection: {
+        ready: "Local Companion connected", launch: "Start Companion", download: "Download Companion", retry: "Check again",
+        code: "6-digit pairing code", pair: "Pair", revoke: "Revoke pairing",
+        states: {
+          checking: "Checking the local Companion", unavailable: "The local Companion is not running", launching: "Starting Companion",
+          permission_denied: "The browser denied local connection access", pairing_required: "Enter the 6-digit code shown by Companion",
+          pairing: "Pairing", ready: "Connected", version_incompatible: "Companion must be updated", error: "Could not connect to Companion",
+        },
+      },
+      cancel: "Cancel", stopTask: "Stop task", calibration: "Calibrate", usage: "Today {used}/{limit}",
+      countdownTitle: "Automatic lookup countdown", countdownText: "Mouse and keyboard control starts when the countdown ends",
+      jobStates: { pending: "Waiting", running: "Lookup running", done: "Lookup complete", error: "Lookup failed", cancelled: "Task stopped" },
+      jobSteps: {
+        prepare_game: "Prepare game", open_social: "Open social panel", type_query: "Enter nickname or UID", search: "Search player",
+        open_result: "Open player profile", capture_home: "Capture home", capture_overview: "Capture overview",
+        capture_ranked: "Capture ranked stats", capture_recent: "Capture recent matches", ocr: "Local recognition", store: "Save player profile",
+      },
+      calibrationPage: {
+        title: "Delta calibration", intro: "Capture the desktop, drag over a control, and save it as a fallback template.", back: "Back to Delta",
+        capture: "Capture desktop", template: "Calibration template", saveCrop: "Save selected area", screenshotAlt: "Current desktop screenshot",
+        captured: "Desktop captured. Drag to select an area.", saved: "Template saved", deleted: "Template deleted", failed: "Calibration failed",
+        ready: "Saved", missing: "Missing", deleteTemplate: "Delete {name} template",
+      },
+    },
+    camera: {
+      title: "Gesture Beauty Camera", intro: "Live beauty effects, soft filters, and gesture particles, all in your browser.",
+      privacy: "Processed only on this device", controls: "Beauty controls", local: "Local processing", openControls: "Open controls",
+      closeControls: "Collapse", filter: "Filter", originalHold: "Hold for original", switchCamera: "Switch camera",
+      capture: "Take photo", stop: "Stop camera", stage: "Camera view", canvas: "Live beauty preview",
+      readyTitle: "Set up your shot", readyText: "Video stays in this browser and is never uploaded.", start: "Start camera",
+      connectingTitle: "Connecting to camera", connectingText: "Allow camera access in the browser prompt.",
+      errorTitle: "Camera did not start", detectAgain: "Try again", running: "Camera is on", modelRetry: "Retry detection",
+      preview: "Photo preview", photoReady: "Your photo is ready", previewText: "Save it to your device or return to retake it.",
+      photoAlt: "New beauty camera photo", retake: "Retake", download: "Save image",
+      modelIdle: "Model idle", modelLoading: "Loading model", modelReady: "Model ready",
+      modelFailed: "Model failed to load; retry", modelPaused: "Detection paused; retry available",
+      gestureIdle: "Open a palm, pinch, or raise both hands", gestureHeart: "Two-hand heart activated",
+      gesturePinch: "Pinch sparkle activated", gesturePalm: "Palm particles activated",
+      permission: "Allow camera access in the address bar, then try again.",
+      notFound: "No camera was found. Connect one and try again.",
+      busy: "The camera is in use by another application. Close it and retry.",
+      unsupported: "This browser does not support camera access. Use a newer browser.",
+      genericError: "Camera startup failed. Check the device and try again.",
+      parameters: { skin: "Smoothing", white: "Brightening", slim: "Face slim", eye: "Larger eyes", blush: "Blush" },
+      filters: { original: "Original", cream: "Cream", peach: "Peach", "first-love": "First Love", cherry: "Cherry Blossom" },
+    },
+  },
+  ja: {
+    common: {
+      back: "ツール一覧へ戻る", loading: "読み込み中…", retry: "再試行", unavailable: "現在利用できません",
+      save: "保存", delete: "削除", clear: "クリア", collapse: "閉じる", copy: "コピー",
+    },
+    home: {
+      kicker: "PP TOOLS · ONLINE SUITE", title: "オンラインツールボックス",
+      summary: "ブラウザツール2つとミニプログラムのソースプロジェクト。", aria: "オンラインツール",
+      footer: "個人サイトへ戻る", featuresAria: "{title} の主な機能", enterTool: "{title} を開く", downloadSource: "{title} のソースをダウンロード",
+      delta: {
+        eyebrow: "戦績インテリジェンス", title: "Delta 戦績分析",
+        description: "プロフィール画像からプレイヤー情報、KD比較、能力、最近の戦績を整理します。",
+        features: ["画像認識", "プレイヤー資料", "ローカル名簿"], action: "戦績を見る", status: "利用可能",
+        imageAlt: "Delta プレイヤー資料画面",
+      },
+      camera: {
+        eyebrow: "ブラウザのリアルタイム映像", title: "ジェスチャー美顔カメラ",
+        description: "美顔補正、フィルター、ジェスチャー効果、撮影をブラウザで行います。",
+        features: ["リアルタイム美顔", "ジェスチャー操作", "ローカル撮影"], action: "カメラを開く", status: "利用可能",
+        imageAlt: "ジェスチャー美顔カメラのプレビュー",
+      },
+      milkTea: {
+        eyebrow: "WeChat ネイティブミニプログラム", title: "三平方ミルクティー",
+        description: "完全なソースをダウンロードし、ローカルデモ付きで WeChat 開発者ツールに読み込めます。",
+        features: ["ネイティブ実装", "ローカルデモ", "クラウド対応"], action: "ソースを見る", status: "ダウンロード可能",
+        imageAlt: "三平方ミルクティー注文画面",
+      },
+    },
+    milkTea: {
+      title: "三平方ミルクティー・ミニプログラム", intro: "WeChat 開発者ツールに直接読み込める完全なネイティブソースです。",
+      download: "ソースをダウンロード", importTitle: "読み込み方法",
+      steps: ["ソースをダウンロードして解凍", "WeChat 開発者ツールで解凍フォルダーを読み込む", "テストアカウントまたは自分の AppID で実行"],
+      demoTitle: "標準はローカルデモ", demoText: "クラウド環境なしで商品、カート、注文、履歴、管理機能を試せます。",
+      cloudTitle: "クラウドモード対応", cloudText: "自分のクラウド環境を設定して切り替えられます。",
+    },
+    delta: {
+      brandSub: "オペレーション · 戦績分析", searchPlaceholder: "ニックネームまたは UID を入力して Enter",
+      search: "検索", localRecords: "ローカル資料", filter: "名簿を絞り込む…", emptyRoster: "ローカル資料はありません",
+      uploadTitle: "スクリーンショットを追加", uploadHint: "予備 · 4枚の画像をドロップまたは貼り付け",
+      fileAria: "プロフィール画像", dropHint: "4枚の画像をドロップ、貼り付け、または選択（順不同）",
+      selected: "選択済み", images: "枚", analyze: "分析して保存", analyzing: "分析中…",
+      added: "{count} 枚の画像を追加しました", selectFirst: "先に画像を選択、ドロップ、または貼り付けてください",
+      running: "画像を分析しています…", reading: "ローカルでプロフィールを読み取っています",
+      failed: "画像分析に失敗しました", noData: "利用可能なデータが見つかりません。画像を確認して再試行してください。",
+      partial: "一部の項目を認識できませんでした。利用可能なデータを保存しました", complete: "完了：{name}",
+      stored: "分析結果をローカル名簿に保存しました", offline: "ローカル認識サービスが停止中です。PP Tools のバックエンドを起動してください。",
+      notFound: "ローカル名簿にありません。画像を追加して資料を作成してください。",
+      found: "ローカル名簿で見つかりました：{name}", saved: "このブラウザに資料を保存しました", removed: "資料を削除しました",
+      choosePlayer: "左の名簿から選ぶか、上部で検索してください", nickname: "プレイヤー名",
+      tags: "プレイヤータグ", tagsPlaceholder: "タグをカンマで区切る", note: "メモ", notePlaceholder: "観察内容を記録…",
+      confirmDelete: "「{name}」の資料を削除しますか？", updated: "更新：{time}", overview: "データ概要",
+      ranked: "ランク戦", recent: "最近の戦績", noRecent: "最近の戦績はありません", noOverview: "概要またはランク戦データがありません",
+      more: "詳細データ ▾", less: "閉じる ▴", unknownPlayer: "名前なしプレイヤー",
+      comparison: "概要 / ランク戦 比較", actualLevel: "実力", overviewRadar: "概要 能力", rankedRadar: "ランク戦 能力",
+      summaryLabels: ["概要・最高難度 KD", "ランク戦・最高難度 KD", "脱出率", "ランク", "収支比", "総試合数", "総資産"],
+      metricLabels: ["ランク", "ランクポイント", "脱出率", "収支比", "試合数", "プレイ時間"],
+      detailLabels: ["命中率", "精密キル率", "持ち出し価値", "累計報酬", "マンデルブリック", "味方の持ち出し価値", "味方救助", "味方復活"],
+      kdLabels: ["通常", "機密", "最高機密"], radarAxes: ["戦闘", "生存", "支援", "探索", "資産"],
+      verdicts: { "v-top": "エリート", "v-good": "上級者", "v-mid": "標準", "v-low": "初心者" },
+      hiddenRecent: "戦績は非公開です", rounds: "{count} 試合", evacuationSummary: "脱出 {wins} 回 · {rate}%", totalKills: "合計キル {count}",
+      matchHeaders: ["結果", "マップ", "難度", "キル", "持ち出し", "ランクポイント", "時間"], evacuated: "✓ 脱出", eliminated: "× 敗退", leftEarly: "途中退出",
+      killCount: "{count} キル", currency: "{value} コイン", absoluteKd: "最高機密 KD", evacuation: "脱出",
+      copyResultImage: "結果画像をコピー", saveResultImage: "結果画像を保存", resultImageCopied: "結果画像をコピーしました", resultImageSaved: "結果画像を保存しました", resultImageFailed: "結果画像を作成できませんでした。保存をお試しください",
+      connection: {
+        ready: "ローカル Companion に接続済み", launch: "Companion を起動", download: "Companion をダウンロード", retry: "再確認",
+        code: "6 桁のペアリングコード", pair: "ペアリング", revoke: "ペアリング解除",
+        states: {
+          checking: "ローカル Companion を確認中", unavailable: "ローカル Companion は起動していません", launching: "Companion を起動中",
+          permission_denied: "ブラウザがローカル接続を拒否しました", pairing_required: "Companion に表示された 6 桁コードを入力してください",
+          pairing: "ペアリング中", ready: "接続済み", version_incompatible: "Companion の更新が必要です", error: "Companion に接続できませんでした",
+        },
+      },
+      cancel: "キャンセル", stopTask: "タスク停止", calibration: "調整", usage: "本日 {used}/{limit}",
+      countdownTitle: "自動検索カウントダウン", countdownText: "終了後にマウスとキーボードを一時的に操作します",
+      jobStates: { pending: "待機中", running: "検索中", done: "検索完了", error: "検索失敗", cancelled: "タスク停止済み" },
+      jobSteps: {
+        prepare_game: "ゲーム準備", open_social: "ソーシャル画面を開く", type_query: "名前または UID を入力", search: "プレイヤー検索",
+        open_result: "プロフィールを開く", capture_home: "ホームを取得", capture_overview: "概要を取得",
+        capture_ranked: "ランク戦を取得", capture_recent: "最近の戦績を取得", ocr: "ローカル認識", store: "プロフィール保存",
+      },
+      calibrationPage: {
+        title: "Delta 画面調整", intro: "デスクトップを取得し、操作部分をドラッグ選択して予備テンプレートとして保存します。", back: "Delta に戻る",
+        capture: "デスクトップを取得", template: "調整テンプレート", saveCrop: "選択範囲を保存", screenshotAlt: "現在のデスクトップ画像",
+        captured: "画像を取得しました。範囲をドラッグしてください。", saved: "テンプレートを保存しました", deleted: "テンプレートを削除しました", failed: "調整に失敗しました",
+        ready: "保存済み", missing: "未保存", deleteTemplate: "{name} テンプレートを削除",
+      },
+    },
+    camera: {
+      title: "ジェスチャー美顔カメラ", intro: "美顔補正、柔らかなフィルター、ジェスチャー効果をブラウザで楽しめます。",
+      privacy: "映像は端末内だけで処理", controls: "美顔コントロール", local: "ローカル処理", openControls: "コントロールを開く",
+      closeControls: "閉じる", filter: "フィルター", originalHold: "長押しで元画像", switchCamera: "カメラ切替",
+      capture: "撮影", stop: "カメラ停止", stage: "カメラ映像", canvas: "リアルタイム美顔映像",
+      readyTitle: "撮影を始めましょう", readyText: "映像はこのブラウザ内だけで処理され、アップロードされません。", start: "カメラを起動",
+      connectingTitle: "カメラに接続中", connectingText: "ブラウザの確認画面でカメラを許可してください。",
+      errorTitle: "カメラを起動できません", detectAgain: "再検出", running: "カメラ起動中", modelRetry: "検出を再試行",
+      preview: "写真プレビュー", photoReady: "写真の準備ができました", previewText: "端末に保存するか、戻って撮り直してください。",
+      photoAlt: "撮影した美顔写真", retake: "撮り直す", download: "画像を保存",
+      modelIdle: "モデル待機中", modelLoading: "モデル読み込み中", modelReady: "モデル準備完了",
+      modelFailed: "モデルの読み込みに失敗しました", modelPaused: "検出を一時停止しました",
+      gestureIdle: "手のひら、ピンチ、両手を試してください", gestureHeart: "両手ハートを検出しました",
+      gesturePinch: "ピンチの光を表示しました", gesturePalm: "手のひらパーティクルを表示しました",
+      permission: "アドレスバーでカメラを許可してから再試行してください。",
+      notFound: "利用できるカメラがありません。接続して再試行してください。",
+      busy: "他のアプリがカメラを使用中です。終了して再試行してください。",
+      unsupported: "このブラウザはカメラに対応していません。新しいブラウザを使用してください。",
+      genericError: "カメラの起動に失敗しました。端末を確認して再試行してください。",
+      parameters: { skin: "美肌", white: "美白", slim: "小顔", eye: "目を大きく", blush: "血色" },
+      filters: { original: "オリジナル", cream: "クリーム", peach: "ピーチ", "first-love": "初恋", cherry: "桜" },
+    },
+  },
+};
+
+export function normalizeLanguage(language) {
+  return SUPPORTED_LANGUAGES.includes(language) ? language : "zh";
+}
+
+function readPath(source, path) {
+  return path.split(".").reduce((value, key) => value && value[key], source);
+}
+
+export function getMessage(language, path) {
+  const normalized = normalizeLanguage(language);
+  return readPath(messages[normalized], path) ?? readPath(messages.zh, path) ?? path;
+}
+
+function flatten(source, prefix = "") {
+  return Object.entries(source).flatMap(([key, value]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    return value && typeof value === "object" && !Array.isArray(value) ? flatten(value, path) : [path];
+  });
+}
+
+export function listMessageKeys(language) {
+  return flatten(messages[normalizeLanguage(language)]).sort();
+}
+
+export function formatMessage(template, values = {}) {
+  if (typeof template !== "string") return template;
+  return Object.entries(values).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}

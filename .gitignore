@@ -4,15 +4,19 @@
 
 node_modules/
 dist/
+dist-*/
+build/
 coverage/
 
 __pycache__/
 .pytest_cache/
 .venv/
 *.pyc
+*.egg-info/
 
 backend/data/*.db
 backend/data/*.sqlite
 backend/data/uploads/
+backend/data/backups/
 
 .superpowers/

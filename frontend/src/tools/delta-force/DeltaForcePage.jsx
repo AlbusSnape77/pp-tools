@@ -1,129 +1,210 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createDeltaCompanionClient } from "../../api/deltaCompanionClient";
+import { useI18n } from "../../i18n/I18nContext";
 import DeltaCommandBar from "./DeltaCommandBar";
+import DeltaConnectionPanel from "./DeltaConnectionPanel";
+import DeltaCountdown from "./DeltaCountdown";
 import DeltaDossier from "./DeltaDossier";
 import DeltaRoster from "./DeltaRoster";
+import DeltaTaskProgress from "./DeltaTaskProgress";
 import DeltaUploadPanel from "./DeltaUploadPanel";
-import {
-  deleteRecord,
-  loadRecords,
-  saveRecords,
-  searchRecords,
-  updateRecord,
-  upsertResult,
-} from "./deltaRecordStore";
+import { useDeltaCompanion } from "./useDeltaCompanion";
 import "./delta-force.css";
 
-function hasUsefulResult(result) {
-  return Boolean(
-    result?.nickname
-    || result?.home?.uid
-    || result?.overview
-    || result?.ranked
-    || result?.recent_matches?.length
-    || result?.recent?.matches?.length,
-  );
+
+function replacePlayer(players, player) {
+  return [player, ...players.filter((item) => item.id !== player.id)];
 }
 
-export default function DeltaForcePage() {
-  const [records, setRecords] = useState(() => loadRecords());
-  const [selectedId, setSelectedId] = useState(() => loadRecords()[0]?.id || null);
+export default function DeltaForcePage({
+  companionClient,
+  countdownSeconds = 5,
+  pollInterval = 500,
+  onNavigate = () => {},
+}) {
+  const { config, t } = useI18n();
+  const client = useMemo(() => companionClient || createDeltaCompanionClient({
+    baseUrl: config.companionBaseUrl,
+    siteOrigin: config.siteOrigin || window.location.origin,
+  }), [companionClient, config.companionBaseUrl, config.siteOrigin]);
+  const connection = useDeltaCompanion({
+    client,
+    protocolUrl: config.companionProtocolUrl || "delta-stats://start",
+  });
+  const [players, setPlayers] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [files, setFiles] = useState([]);
-  const [busy, setBusy] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
   const [status, setStatus] = useState(null);
+  const [countdownQuery, setCountdownQuery] = useState("");
+  const [job, setJob] = useState(null);
+  const [usage, setUsage] = useState(null);
+  const pollTimer = useRef(null);
+  const activeJobId = useRef(null);
+  const filterReady = useRef(false);
 
-  const selectedRecord = records.find((record) => record.id === selectedId) || null;
-  const visibleRecords = useMemo(() => searchRecords(records, filter), [records, filter]);
+  const selectedRecord = players.find((player) => player.id === selectedId) || null;
+  const jobBusy = Boolean(job && ["pending", "running"].includes(job.state));
 
-  const commitRecords = (nextRecords) => {
-    saveRecords(nextRecords);
-    setRecords(nextRecords);
-  };
+  const loadPlayers = useCallback(async (value = "") => {
+    const next = await client.listPlayers(value);
+    setPlayers(next);
+    setSelectedId((current) => current && next.some((item) => item.id === current)
+      ? current
+      : next[0]?.id || null);
+    return next;
+  }, [client]);
+
+  useEffect(() => {
+    if (connection.state !== "ready") return undefined;
+    Promise.all([loadPlayers(), client.getUsage()])
+      .then(([, nextUsage]) => setUsage(nextUsage))
+      .catch((error) => setStatus({ kind: "err", text: error.code || t("delta.failed") }));
+    return undefined;
+  }, [client, connection.state, loadPlayers, t]);
+
+  useEffect(() => {
+    if (connection.state !== "ready") {
+      filterReady.current = false;
+      return undefined;
+    }
+    if (!filterReady.current) {
+      filterReady.current = true;
+      return undefined;
+    }
+    const timer = window.setTimeout(() => {
+      loadPlayers(filter).catch(() => {});
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [connection.state, filter, loadPlayers]);
+
+  useEffect(() => () => {
+    if (pollTimer.current) window.clearTimeout(pollTimer.current);
+    if (activeJobId.current) client.cancelJob(activeJobId.current).catch(() => {});
+  }, [client]);
 
   const addFiles = useCallback((incoming) => {
     if (!incoming.length) return;
     setFiles((current) => [...current, ...incoming]);
-    setUploadMessage(`已加入 ${incoming.length} 张截图`);
-  }, []);
+    setUploadMessage(t("delta.added", { count: incoming.length }));
+  }, [t]);
 
   const analyze = async () => {
     if (!files.length) {
-      setUploadMessage("请先选择、拖入或粘贴图片");
+      setUploadMessage(t("delta.selectFirst"));
       return;
     }
-
-    const formData = new FormData();
-    files.forEach((file, index) => formData.append("images", file, file.name || `screenshot-${index + 1}.png`));
-    setBusy(true);
-    setStatus({ kind: "run", text: "正在识别截图，请稍候…" });
-    setUploadMessage("本机正在读取资料页");
-
+    setUploadBusy(true);
+    setStatus({ kind: "run", text: t("delta.running") });
     try {
-      const response = await fetch("/api/delta-force/analyze", { method: "POST", body: formData });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || "截图识别失败");
-      if (!hasUsefulResult(body.result)) {
-        setStatus({ kind: "err", text: "没有识别到可用资料，请检查截图后重试" });
-        setUploadMessage("没有识别到可用资料");
-        return;
-      }
-
-      const nextRecords = upsertResult(records, body.result);
-      commitRecords(nextRecords);
-      setSelectedId(nextRecords[0].id);
+      const result = await client.manualLookup(files);
+      setPlayers((current) => replacePlayer(current, result.player));
+      setSelectedId(result.player.id);
       setFiles([]);
-      const partial = Boolean(body.warnings?.length);
-      setStatus({
-        kind: partial ? "warn" : "ok",
-        text: partial ? "部分字段未识别，已保存可用资料" : `识别完成：${nextRecords[0].nickname}`,
-      });
-      setUploadMessage(partial ? "识别完成，部分资料显示为 —" : "识别完成并已写入本机花名册");
+      setStatus({ kind: "ok", text: t("delta.complete", { name: result.player.nickname }) });
+      setUploadMessage(t("delta.stored"));
     } catch (error) {
-      setStatus({ kind: "err", text: error.message || "截图识别失败" });
-      setUploadMessage("识别失败，请检查服务或截图后重试");
+      setStatus({ kind: "err", text: error.code || t("delta.failed") });
+      setUploadMessage(error.code || t("delta.failed"));
     } finally {
-      setBusy(false);
+      setUploadBusy(false);
     }
   };
 
-  const search = () => {
-    const matched = searchRecords(records, query)[0];
-    if (matched) {
-      setSelectedId(matched.id);
-      setFilter("");
-      setStatus({ kind: "ok", text: `已从本机花名册找到：${matched.nickname}` });
+  const finishJob = useCallback(async (nextJob) => {
+    activeJobId.current = null;
+    if (nextJob.state === "done" && nextJob.player) {
+      setPlayers((current) => replacePlayer(current, nextJob.player));
+      setSelectedId(nextJob.player.id);
+      setStatus({ kind: "ok", text: t("delta.complete", { name: nextJob.player.nickname }) });
+      setUsage(await client.getUsage());
+    } else if (nextJob.state === "cancelled") {
+      setStatus({ kind: "warn", text: t("delta.jobStates.cancelled") });
+    } else {
+      setStatus({ kind: "err", text: nextJob.error?.code || t("delta.failed") });
+    }
+  }, [client, t]);
+
+  const pollJob = useCallback(async (jobId) => {
+    const nextJob = await client.getJob(jobId);
+    setJob(nextJob);
+    if (["done", "error", "cancelled"].includes(nextJob.state)) {
+      await finishJob(nextJob);
       return;
     }
-    setStatus({ kind: "warn", text: "本机花名册中没有找到该玩家，请上传截图建立档案" });
+    pollTimer.current = window.setTimeout(() => pollJob(jobId), pollInterval);
+  }, [client, finishJob, pollInterval]);
+
+  const submitAutomaticLookup = useCallback(async () => {
+    const value = countdownQuery;
+    setCountdownQuery("");
+    try {
+      const submitted = await client.autoLookup(value);
+      activeJobId.current = submitted.job_id;
+      setJob({ id: submitted.job_id, state: "pending", step: null, message: t("delta.jobStates.pending") });
+      await pollJob(submitted.job_id);
+    } catch (error) {
+      setStatus({ kind: "err", text: error.code || t("delta.failed") });
+    }
+  }, [client, countdownQuery, pollJob, t]);
+
+  const beginCountdown = () => {
+    const value = query.trim();
+    if (!value || connection.state !== "ready" || jobBusy) return;
+    setCountdownQuery(value);
   };
 
-  const save = (id, patch) => {
-    const nextRecords = updateRecord(records, id, patch);
-    commitRecords(nextRecords);
-    setStatus({ kind: "ok", text: "档案已保存到当前浏览器" });
+  const cancelCurrentJob = async () => {
+    if (pollTimer.current) window.clearTimeout(pollTimer.current);
+    if (activeJobId.current) {
+      const cancelled = await client.cancelJob(activeJobId.current);
+      activeJobId.current = null;
+      setJob(cancelled);
+    }
   };
 
-  const remove = (id) => {
-    const nextRecords = deleteRecord(records, id);
-    commitRecords(nextRecords);
-    setSelectedId(nextRecords[0]?.id || null);
-    setStatus({ kind: "ok", text: "档案已删除" });
+  const save = async (id, patch) => {
+    const updated = await client.updatePlayer(id, patch);
+    setPlayers((current) => replacePlayer(current, updated));
+    setStatus({ kind: "ok", text: t("delta.saved") });
+  };
+
+  const remove = async (id) => {
+    await client.deletePlayer(id);
+    setPlayers((current) => current.filter((player) => player.id !== id));
+    setSelectedId((current) => current === id ? null : current);
+    setStatus({ kind: "ok", text: t("delta.removed") });
   };
 
   return (
     <main className="delta-app">
       <DeltaCommandBar
         query={query}
-        recordCount={records.length}
+        recordCount={players.length}
         status={status}
+        busy={jobBusy}
+        usage={usage}
+        ready={connection.state === "ready"}
         onQueryChange={setQuery}
-        onSearch={search}
+        onSearch={beginCountdown}
+        onStop={cancelCurrentJob}
+        onCalibration={() => onNavigate("delta-force/calibration")}
       />
+      <DeltaConnectionPanel connection={connection} downloadUrl={config.companionDownloadUrl} />
+      {countdownQuery ? (
+        <DeltaCountdown
+          seconds={countdownSeconds}
+          onComplete={submitAutomaticLookup}
+          onCancel={() => setCountdownQuery("")}
+        />
+      ) : null}
+      <DeltaTaskProgress job={job} onStop={cancelCurrentJob} />
       <DeltaUploadPanel
         files={files}
-        busy={busy}
+        busy={uploadBusy || jobBusy || connection.state !== "ready"}
         message={uploadMessage}
         onAddFiles={addFiles}
         onClear={() => {
@@ -134,7 +215,7 @@ export default function DeltaForcePage() {
       />
       <div id="layout">
         <DeltaRoster
-          records={visibleRecords}
+          records={players}
           selectedId={selectedId}
           filter={filter}
           onFilterChange={setFilter}
@@ -148,7 +229,7 @@ export default function DeltaForcePage() {
               onDelete={remove}
               onCollapse={() => setSelectedId(null)}
             />
-          ) : <div className="result-empty">从左侧花名册选择玩家，或在顶部直接查询</div>}
+          ) : <div className="result-empty">{t("delta.choosePlayer")}</div>}
         </section>
       </div>
     </main>

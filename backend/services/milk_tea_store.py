@@ -7,22 +7,22 @@ from secrets import token_hex
 
 SEED_PRODUCTS = [
     {
-        "name": "Brown Sugar Milk Tea",
-        "category": "Milk Tea",
+        "name": "黑糖珍珠鲜奶",
+        "category": "奶茶",
         "price": 18,
-        "description": "Brown sugar, fresh milk, and black tea.",
+        "description": "慢熬黑糖、鲜牛乳与弹韧珍珠，醇厚不腻。",
     },
     {
-        "name": "Jasmine Fruit Tea",
-        "category": "Fruit Tea",
+        "name": "茉莉鲜果茶",
+        "category": "果茶",
         "price": 16,
-        "description": "Jasmine tea with seasonal fruit.",
+        "description": "清香茉莉茶底搭配当季鲜果，轻盈清爽。",
     },
     {
-        "name": "Cheese Matcha",
-        "category": "Special",
+        "name": "芝士抹茶",
+        "category": "特调",
         "price": 20,
-        "description": "Matcha latte with a cheese foam top.",
+        "description": "浓郁抹茶牛乳覆上绵密芝士奶盖。",
     },
 ]
 

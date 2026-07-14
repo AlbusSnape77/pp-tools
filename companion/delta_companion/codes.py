@@ -1,0 +1,30 @@
+JOB_STEPS = (
+    "prepare_game",
+    "open_social",
+    "type_query",
+    "search",
+    "open_result",
+    "capture_home",
+    "capture_overview",
+    "capture_ranked",
+    "capture_recent",
+    "ocr",
+    "store",
+)
+
+ERROR_CODES = (
+    "companion_unavailable",
+    "pairing_required",
+    "pairing_code_invalid",
+    "pairing_code_expired",
+    "origin_denied",
+    "token_invalid",
+    "version_incompatible",
+    "game_not_running",
+    "player_not_found",
+    "calibration_required",
+    "automation_failed",
+    "ocr_empty",
+    "daily_limit_reached",
+    "job_cancelled",
+)

@@ -1,11 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiFetch } from "./client";
+import { apiFetch, buildApiUrl } from "./client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
 describe("apiFetch", () => {
+  it("builds same-origin and configured API URLs", () => {
+    expect(buildApiUrl("http://127.0.0.1:5175/", "/api/delta-force/analyze"))
+      .toBe("http://127.0.0.1:5175/api/delta-force/analyze");
+    expect(buildApiUrl("", "/api/health")).toBe("/api/health");
+  });
+
   it("returns parsed JSON from a successful response", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ status: "ok" }), {

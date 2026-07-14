@@ -1,3 +1,9 @@
+export function buildApiUrl(baseUrl, path) {
+  const normalizedBase = String(baseUrl || "").replace(/\/+$/, "");
+  const normalizedPath = `/${String(path || "").replace(/^\/+/, "")}`;
+  return normalizedBase ? `${normalizedBase}${normalizedPath}` : normalizedPath;
+}
+
 export async function apiFetch(path, options = {}) {
   const { headers: customHeaders = {}, ...requestOptions } = options;
   const response = await fetch(path, {
