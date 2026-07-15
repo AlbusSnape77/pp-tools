@@ -66,12 +66,15 @@ export function useDeltaCompanion({
     setStateValue(next);
   }, []);
 
-  const detect = useCallback(async () => {
+  const detect = useCallback(async ({
+    announceChecking = true,
+    preserveUnavailable = false,
+  } = {}) => {
     if (!client) {
-      setState("unavailable");
+      if (!preserveUnavailable) setState("unavailable");
       return "unavailable";
     }
-    setState("checking");
+    if (announceChecking) setState("checking");
     setError(null);
     try {
       const status = await client.health();
@@ -90,7 +93,7 @@ export function useDeltaCompanion({
     } catch (caught) {
       setError(caught);
       const next = stateForError(caught);
-      setState(next);
+      if (!preserveUnavailable || next !== "unavailable") setState(next);
       return next;
     }
   }, [client, requirements, setState]);
@@ -107,9 +110,14 @@ export function useDeltaCompanion({
     let attempts = 0;
     const poll = async () => {
       attempts += 1;
-      const result = await detect();
+      const result = await detect({
+        announceChecking: false,
+        preserveUnavailable: true,
+      });
       if (result === "unavailable" && attempts < 20) {
         launchPollTimer.current = window.setTimeout(poll, 500);
+      } else if (result === "unavailable") {
+        setState("unavailable");
       }
     };
     Promise.resolve(launchProtocol(protocolUrl))

@@ -59,3 +59,30 @@ it("uses the local runtime endpoint before the custom protocol", async () => {
   expect(fetchImpl).toHaveBeenCalledWith("/api/delta-runtime/start", { method: "POST" });
   expect(openProtocol).not.toHaveBeenCalled();
 });
+
+
+it("keeps the launching state stable while the companion is starting", async () => {
+  const client = {
+    hasToken: vi.fn(() => false),
+    health: vi.fn().mockRejectedValue(
+      Object.assign(new Error("offline"), { code: "companion_unavailable" }),
+    ),
+  };
+  const launchProtocol = vi.fn().mockResolvedValue("protocol");
+  const { result, unmount } = renderHook(() => useDeltaCompanion({
+    client,
+    launchProtocol,
+  }));
+
+  await waitFor(() => expect(result.current.state).toBe("unavailable"));
+  vi.useFakeTimers();
+  act(() => result.current.launch());
+  await act(async () => {
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(500);
+  });
+
+  expect(result.current.state).toBe("launching");
+  unmount();
+  vi.useRealTimers();
+});

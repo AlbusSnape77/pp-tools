@@ -15,6 +15,7 @@ from delta_companion.config import API_VERSION, validate_allowed_origins
 
 
 ROOT = Path(__file__).resolve().parent
+PUBLIC_SITE_ORIGINS = ("https://albussnape77.github.io",)
 
 
 def file_sha256(path: Path) -> str:
@@ -54,6 +55,10 @@ def default_local_origins() -> list[str]:
     origins = [f"http://127.0.0.1:{port}" for port in range(8787, 8798)]
     origins.extend(["http://127.0.0.1:5176", "http://127.0.0.1:4176"])
     return origins
+
+
+def default_release_origins() -> list[str]:
+    return default_local_origins() + list(PUBLIC_SITE_ORIGINS)
 
 
 def build(*, allowed_origins: list[str], run_tests: bool = True) -> Path:
@@ -105,7 +110,7 @@ def main(argv=None) -> int:
     parser.add_argument("--allowed-origin", action="append", default=[])
     parser.add_argument("--skip-tests", action="store_true")
     args = parser.parse_args(argv)
-    origins = default_local_origins() + list(args.allowed_origin)
+    origins = default_release_origins() + list(args.allowed_origin)
     executable = build(allowed_origins=origins, run_tests=not args.skip_tests)
     print(executable)
     print(f"SHA-256: {file_sha256(executable)}")
