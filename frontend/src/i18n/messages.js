@@ -8,7 +8,7 @@ export const messages = {
     },
     home: {
       kicker: "PP TOOLS · ONLINE SUITE", title: "我的在线工具箱",
-      summary: "两个网页工具和一个小程序源码项目。", aria: "在线工具",
+      summary: "三个网页工具和一个小程序源码项目。", aria: "在线工具",
       footer: "返回个人网站", featuresAria: "{title}主要功能", enterTool: "进入{title}", downloadSource: "下载{title}小程序源码",
       delta: {
         eyebrow: "战绩情报工作台", title: "Delta 战绩分析",
@@ -28,6 +28,12 @@ export const messages = {
         features: ["原生小程序", "本地演示", "云开发可选"], action: "查看源码", status: "源码可下载",
         imageAlt: "三平方奶茶店商品与点单界面",
       },
+      localChat: {
+        eyebrow: "QWEN · 本机运行", title: "本地编程助手",
+        description: "该工具仅为方便作者个人使用：Qwen2.5-Coder-7B-Instruct 在作者电脑本地运行；当前页面仅作项目展示，不提供在线模型服务。",
+        features: ["连续对话", "流式回答", "作者本机运行"], action: "查看界面", status: "仅供作者使用",
+        imageAlt: "本地编程助手对话界面",
+      },
     },
     milkTea: {
       title: "三平方奶茶店小程序", intro: "完整的微信原生小程序源码，可直接导入微信开发者工具。",
@@ -35,6 +41,15 @@ export const messages = {
       steps: ["下载并解压源码包", "在微信开发者工具中导入解压目录", "使用测试号或自己的 AppID 编译运行"],
       demoTitle: "默认本地演示", demoText: "无需云环境即可体验商品、购物车、下单、订单和管理功能。",
       cloudTitle: "云开发可选", cloudText: "配置自己的云环境后，可以切换到云开发模式。",
+    },
+    localChat: {
+      title: "本地编程助手", intro: "Qwen2.5-Coder-7B-Instruct 在作者个人电脑上运行；当前页面仅作展示，不提供模型或对话服务。",
+      conversation: "本地对话", welcomeTitle: "今天想一起解决什么？", welcomeText: "可以问代码、论文、写作，也可以继续追问。",
+      placeholder: "输入消息，Enter 发送，Shift + Enter 换行", messageLabel: "消息", send: "发送", stop: "停止", clear: "清空对话", unload: "释放显存", thinking: "正在思考…",
+      roles: { user: "你", assistant: "Qwen" }, error: "回答失败：{message}",
+      privacy: "作者使用时，对话只在其当前电脑处理；当前页面不接收或处理访客对话。",
+      settings: { title: "生成设置", systemPrompt: "系统设定", maxTokens: "最大回答长度", temperature: "随机性", topP: "候选范围" },
+      connection: { connecting: "正在连接本地服务", connected: "本地服务已连接", loading: "正在加载模型", released: "显存已释放，下次发送时会重新加载模型", offline: "本地服务未启动" },
     },
     delta: {
       brandSub: "烽火地带 · 战绩分析", searchPlaceholder: "输入对方昵称或编号(UID)，回车查询",
@@ -123,7 +138,7 @@ export const messages = {
     },
     home: {
       kicker: "PP TOOLS · ONLINE SUITE", title: "My Online Toolbox",
-      summary: "Two browser tools and one mini program source project.", aria: "Online tools",
+      summary: "Three browser tools and one mini program source project.", aria: "Online tools",
       footer: "Back to personal site", featuresAria: "{title} features", enterTool: "Open {title}", downloadSource: "Download {title} source",
       delta: {
         eyebrow: "Match intelligence workspace", title: "Delta Stats Analyzer",
@@ -143,6 +158,12 @@ export const messages = {
         features: ["Native mini program", "Local demo", "Optional cloud mode"], action: "View source", status: "Source available",
         imageAlt: "Sanpingfang milk tea ordering interface",
       },
+      localChat: {
+        eyebrow: "QWEN · RUNS LOCALLY", title: "Local Coding Assistant",
+        description: "Built only for the author's personal use: Qwen2.5-Coder-7B-Instruct runs on the author's computer. This page is a project preview and provides no online model service.",
+        features: ["Conversation context", "Streaming replies", "Author's local runtime"], action: "View interface", status: "Author use only",
+        imageAlt: "Local coding assistant conversation screen",
+      },
     },
     milkTea: {
       title: "Sanpingfang Milk Tea Mini Program", intro: "Complete native WeChat Mini Program source ready for WeChat DevTools.",
@@ -150,6 +171,15 @@ export const messages = {
       steps: ["Download and extract the package", "Import the extracted folder in WeChat DevTools", "Build with a test account or your own AppID"],
       demoTitle: "Local demo by default", demoText: "Try products, cart, checkout, orders, and admin features without a cloud environment.",
       cloudTitle: "Optional cloud mode", cloudText: "Configure your own cloud environment to switch to cloud mode.",
+    },
+    localChat: {
+      title: "Local Coding Assistant", intro: "Qwen2.5-Coder-7B-Instruct runs on the author's personal computer. This page is for display only and provides no model or chat service.",
+      conversation: "Local conversation", welcomeTitle: "What should we solve today?", welcomeText: "Ask about code, papers, writing, or continue with follow-up questions.",
+      placeholder: "Type a message. Enter to send, Shift + Enter for a new line", messageLabel: "Message", send: "Send", stop: "Stop", clear: "Clear chat", unload: "Release memory", thinking: "Thinking…",
+      roles: { user: "You", assistant: "Qwen" }, error: "Reply failed: {message}",
+      privacy: "When used by the author, conversations are processed only on that computer. This page does not receive or process visitor chats.",
+      settings: { title: "Generation settings", systemPrompt: "System instruction", maxTokens: "Maximum reply length", temperature: "Randomness", topP: "Candidate range" },
+      connection: { connecting: "Connecting to local service", connected: "Local service connected", loading: "Loading model", released: "Memory released; the model will reload on the next message", offline: "Local service is not running" },
     },
     delta: {
       brandSub: "Operations · Stats Analysis", searchPlaceholder: "Enter nickname or UID and press Enter",
@@ -238,7 +268,7 @@ export const messages = {
     },
     home: {
       kicker: "PP TOOLS · ONLINE SUITE", title: "オンラインツールボックス",
-      summary: "ブラウザツール2つとミニプログラムのソースプロジェクト。", aria: "オンラインツール",
+      summary: "ブラウザツール3つとミニプログラムのソースプロジェクト。", aria: "オンラインツール",
       footer: "個人サイトへ戻る", featuresAria: "{title} の主な機能", enterTool: "{title} を開く", downloadSource: "{title} のソースをダウンロード",
       delta: {
         eyebrow: "戦績インテリジェンス", title: "Delta 戦績分析",
@@ -258,6 +288,12 @@ export const messages = {
         features: ["ネイティブ実装", "ローカルデモ", "クラウド対応"], action: "ソースを見る", status: "ダウンロード可能",
         imageAlt: "三平方ミルクティー注文画面",
       },
+      localChat: {
+        eyebrow: "QWEN · ローカル実行", title: "ローカル・コーディングアシスタント",
+        description: "作者個人の利用を便利にするためのツールです。Qwen2.5-Coder-7B-Instruct は作者の PC 上で動作し、このページではオンラインのモデルサービスを提供しません。",
+        features: ["会話履歴", "ストリーミング応答", "作者の PC で実行"], action: "画面を見る", status: "作者個人用",
+        imageAlt: "ローカル・コーディングアシスタントの対話画面",
+      },
     },
     milkTea: {
       title: "三平方ミルクティー・ミニプログラム", intro: "WeChat 開発者ツールに直接読み込める完全なネイティブソースです。",
@@ -265,6 +301,15 @@ export const messages = {
       steps: ["ソースをダウンロードして解凍", "WeChat 開発者ツールで解凍フォルダーを読み込む", "テストアカウントまたは自分の AppID で実行"],
       demoTitle: "標準はローカルデモ", demoText: "クラウド環境なしで商品、カート、注文、履歴、管理機能を試せます。",
       cloudTitle: "クラウドモード対応", cloudText: "自分のクラウド環境を設定して切り替えられます。",
+    },
+    localChat: {
+      title: "ローカル・コーディングアシスタント", intro: "Qwen2.5-Coder-7B-Instruct は作者個人の PC 上で動作します。このページは展示のみで、モデルや対話サービスを提供しません。",
+      conversation: "ローカル対話", welcomeTitle: "今日は何を一緒に解決しますか？", welcomeText: "コード、論文、文章について質問し、続けて相談できます。",
+      placeholder: "メッセージを入力。Enter で送信、Shift + Enter で改行", messageLabel: "メッセージ", send: "送信", stop: "停止", clear: "対話を消去", unload: "メモリを解放", thinking: "考えています…",
+      roles: { user: "あなた", assistant: "Qwen" }, error: "応答に失敗しました：{message}",
+      privacy: "作者が使用する場合、対話はその PC 内だけで処理されます。このページは訪問者の対話を受信・処理しません。",
+      settings: { title: "生成設定", systemPrompt: "システム設定", maxTokens: "最大応答長", temperature: "ランダム性", topP: "候補範囲" },
+      connection: { connecting: "ローカルサービスに接続中", connected: "ローカルサービス接続済み", loading: "モデルを読み込み中", released: "メモリを解放しました。次回送信時に再読み込みします", offline: "ローカルサービスが起動していません" },
     },
     delta: {
       brandSub: "オペレーション · 戦績分析", searchPlaceholder: "ニックネームまたは UID を入力して Enter",

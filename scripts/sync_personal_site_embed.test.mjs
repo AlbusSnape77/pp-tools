@@ -31,6 +31,7 @@ test("只同步固定白名单并清理旧产物", async () => {
     await put(publicRoot, "images/tools/delta-force.webp", "delta");
     await put(publicRoot, "images/tools/gesture-cam.webp", "camera");
     await put(publicRoot, "images/tools/milk-tea.webp", "milk");
+    await put(publicRoot, "images/tools/local-chat.png", "chat");
     await put(publicRoot, "vision/models/face_landmarker.task", "face");
     await put(publicRoot, "vision/models/hand_landmarker.task", "hand");
     await put(publicRoot, "vision/wasm/runtime.js", "wasm-js");
@@ -44,7 +45,8 @@ test("只同步固定白名单并清理旧产物", async () => {
     await assert.rejects(readFile(path.join(targetRoot, "old.js")));
     await assert.rejects(readFile(path.join(targetRoot, "private.txt")));
     assert.equal(await readFile(path.join(targetRoot, "pp-tools-embed.js"), "utf8"), "bundle");
-    assert.equal(report.fileCount, 11);
+    assert.equal(await readFile(path.join(targetRoot, "images/tools/local-chat.png"), "utf8"), "chat");
+    assert.equal(report.fileCount, 12);
     const sourceZip = path.join(publicRoot, "downloads/sanpingfang-miniprogram-source.zip");
     const targetZip = path.join(targetRoot, "downloads/sanpingfang-miniprogram-source.zip");
     assert.equal(await sha256(sourceZip), await sha256(targetZip));

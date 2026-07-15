@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import AppLayout from "./components/AppLayout";
 import HomePage from "./pages/HomePage";
 import BeautyCamPage from "./tools/beauty-cam/BeautyCamPage";
+import LocalChatPage from "./tools/local-chat/LocalChatPage";
 import { I18nProvider } from "./i18n/I18nContext";
 
 const DeltaForcePage = lazy(() => import("./tools/delta-force/DeltaForcePage"));
@@ -19,6 +20,13 @@ export default function App() {
         <Suspense fallback={<main aria-label="正在加载战绩工具" />}>
           <DeltaForcePage />
         </Suspense>
+      </I18nProvider>
+    );
+  }
+  if (pathname === "/tools/local-chat") {
+    return (
+      <I18nProvider language="zh">
+        <LocalChatPage onBack={() => window.location.assign("/")} />
       </I18nProvider>
     );
   }

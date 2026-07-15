@@ -5,6 +5,7 @@ const TOOL_DEFINITIONS = [
   { id: "delta-force", key: "delta", href: "/tools/delta-force", image: "images/tools/delta-force.webp", ready: true },
   { id: "beauty-cam", key: "camera", href: "/tools/beauty-cam", image: "images/tools/gesture-cam.webp", ready: true },
   { id: "milk-tea", key: "milkTea", href: "/downloads/sanpingfang-miniprogram-source.zip", image: "images/tools/milk-tea.webp", download: "sanpingfang-miniprogram-source.zip", ready: true },
+  { id: "local-chat", key: "localChat", href: "/tools/local-chat", image: "images/tools/local-chat.png", ready: true },
 ];
 
 function joinAssetUrl(base, path) {

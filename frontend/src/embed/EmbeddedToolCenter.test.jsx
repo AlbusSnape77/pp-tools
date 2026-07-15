@@ -51,3 +51,22 @@ it("renders the Delta detail flush with an in-toolbar back action", async () => 
   expect(onNavigate).toHaveBeenCalledWith("home");
   expect(embedCss).toMatch(/\.pp-tools-embed #topbar\s*{[^}]*top:\s*0/);
 });
+
+it("renders the local conversation route and returns to the gallery", async () => {
+  const onNavigate = vi.fn();
+  const chatClient = {
+    start: vi.fn().mockResolvedValue({ status: "idle" }),
+  };
+  render(
+    <EmbeddedToolCenter
+      language="zh"
+      route="local-chat"
+      onNavigate={onNavigate}
+      chatClient={chatClient}
+    />,
+  );
+
+  expect(screen.getByRole("heading", { level: 1, name: "本地编程助手" })).toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "返回工具中心" }));
+  expect(onNavigate).toHaveBeenCalledWith("home");
+});

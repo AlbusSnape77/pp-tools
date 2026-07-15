@@ -8,5 +8,6 @@ it("normalizes supported and unknown tool routes", () => {
   expect(normalizeToolRoute("delta-force/unknown")).toBe("home");
   expect(normalizeToolRoute("beauty-cam")).toBe("beauty-cam");
   expect(normalizeToolRoute("milk-tea")).toBe("milk-tea");
+  expect(normalizeToolRoute("local-chat")).toBe("local-chat");
   expect(normalizeToolRoute("unknown")).toBe("home");
 });

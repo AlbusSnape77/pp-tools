@@ -39,6 +39,15 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders the immersive local conversation route", () => {
+    window.history.pushState({}, "", "/tools/local-chat");
+
+    render(<App />);
+
+    expect(screen.getByRole("heading", { level: 1, name: "本地编程助手" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
+  });
+
   it("旧奶茶网页路由回到工具首页，导航指向源码卡片", () => {
     window.history.pushState({}, "", "/tools/milk-tea");
 

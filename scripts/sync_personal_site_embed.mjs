@@ -8,6 +8,7 @@ const PUBLIC_FILES = [
   "images/tools/delta-force.webp",
   "images/tools/gesture-cam.webp",
   "images/tools/milk-tea.webp",
+  "images/tools/local-chat.png",
   "vision/models/face_landmarker.task",
   "vision/models/hand_landmarker.task",
   "downloads/sanpingfang-miniprogram-source.zip",
